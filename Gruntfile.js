@@ -26,63 +26,94 @@ module.exports = function (grunt) {
     };
 
     // Load grunt config automatically
-    require('load-grunt-config')( grunt, {
+    require('load-grunt-config')(grunt, {
         // path to task.js files,
-        configPath: path.join( process.cwd(), 'grunt' ),
+        configPath: path.join(process.cwd(), 'grunt'),
         init: true,
         data: {
             // Metadata
-            pkg: grunt.file.readJSON( 'package.json' ),
-            bwr: grunt.file.readJSON( 'bower.json' ),
+            pkg: grunt.file.readJSON('package.json'),
+            bwr: grunt.file.readJSON('bower.json'),
             // App config
             config: config,
             // Connect config
             host: host,
             // Task configuration
+            jshint: {
+                options: {
+                    jshintrc: '.jshintrc',
+                    reporter: require( 'jshint-stylish-ex' )
+                },
+
+                gruntFile: {
+                    src: 'Gruntfile.js'
+                }
+            },
+            watch: {
+                options: {
+                    interval: config.interval // https://github.com/gruntjs/grunt-contrib-watch/issues/35#issuecomment-18508836
+                },
+                gruntFile: {
+                    files: 'Gruntfile.js',
+                    tasks: ['jshint:gruntFile']
+                }
+            },
             copy: {
                 // main
                 main: {
-                    files: [{
-                        cwd: '<%= config.swe %>/v2/',
-                        dest: '<%= config.htdocs %>/<%= config.assets %>/',
-                        src: '**',
-                        expand: true,
-                        flatten: false,
-                        filter: 'isFile'
-                    }, {
-                        cwd: '<%= config.swe %>/includes/global/',
-                        dest: '<%= config.htdocs %>/assets/includes/global/',
-                        src: '**',
-                        expand: true,
-                        flatten: false,
-                        filter: 'isFile'
-                    }, {
-                        cwd: '<%= config.swe %>/includes/nav/',
-                        dest: '<%= config.htdocs %>/assets/includes/nav/',
-                        src: '**',
-                        expand: true,
-                        flatten: false,
-                        filter: 'isFile'
-                    }, {
-                        cwd: '<%= config.swe %>/images/',
-                        dest: '<%= config.htdocs %>/assets/images/',
-                        src: '**',
-                        expand: true,
-                        flatten: false,
-                        filter: 'isFile'
-                    }]
+                    files: [
+                        {
+                            cwd: '<%= config.swe %>/v2/',
+                            dest: '<%= config.htdocs %>/<%= config.assets %>/',
+                            src: '**',
+                            expand: true,
+                            flatten: false,
+                            filter: 'isFile'
+                        },
+                        {
+                            cwd: '<%= config.swe %>/includes/global/',
+                            dest: '<%= config.htdocs %>/assets/includes/global/',
+                            src: '**',
+                            expand: true,
+                            flatten: false,
+                            filter: 'isFile'
+                        },
+                        {
+                            cwd: '<%= config.swe %>/includes/nav/',
+                            dest: '<%= config.htdocs %>/assets/includes/nav/',
+                            src: '**',
+                            expand: true,
+                            flatten: false,
+                            filter: 'isFile'
+                        },
+                        {
+                            cwd: '<%= config.swe %>/images/',
+                            dest: '<%= config.htdocs %>/assets/images/',
+                            src: '**',
+                            expand: true,
+                            flatten: false,
+                            filter: 'isFile'
+                        }
+                    ]
+                },
+                // assets
+                assets: {
+                    files: [
+                    ]
                 }
             },
             clean: {
                 base: {
-                    files: [{
-                        dot: true,
-                        src: [
-                            '.tmp',
-                            '<%= config.build %>',
-                            '<%= config.htdocs %>'
-                        ]
-                    }]
+                    files: [
+                        {
+                            dot: true,
+                            src: [
+                                '.tmp',
+                                '<%= config.build %>',
+                                '<%= config.htdocs %>'
+                            ]
+                        }
+                    ]
                 }
             }
         }
@@ -95,7 +126,7 @@ module.exports = function (grunt) {
     require('time-grunt')(grunt);
 
     // default task
-    grunt.registerTask( 'default', [
+    grunt.registerTask('default', [
         'clean:base',
         'copy:main'
     ]);
