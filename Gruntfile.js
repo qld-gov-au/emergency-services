@@ -39,6 +39,28 @@ module.exports = function (grunt) {
             // Connect config
             host: host,
             // Task configuration
+            connect: {
+                options: {
+                    port: '<%= host.port.host %>',
+                    open: '<%= host.open %>',
+                    livereload: '<%= host.livereload %>',
+                    // Change this to '0.0.0.0' to access the server from outside
+                    hostname: 'localhost'
+                },
+                livereload: {
+                    livereload: {
+                        options: {
+                            middleware: function(connect) {
+                                return [
+                                    connect.static('.tmp'),
+                                    connect().use('/bower_components', connect.static('./bower_components')),
+                                    connect.static(config.htdocs)
+                                ];
+                            }
+                        }
+                    }
+                }
+            },
             jshint: {
                 options: {
                     jshintrc: '.jshintrc',
