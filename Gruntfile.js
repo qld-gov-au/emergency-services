@@ -126,17 +126,16 @@ module.exports = function (grunt) {
 
         // Empties folders to start fresh
         clean: {
-            dist: {
+            build: {
                 files: [{
                     dot: true,
                     src: [
                         '.tmp',
-                        '<%= config.dist %>/*',
-                        '!<%= config.dist %>/.git*'
+                        '<%= config.build %>',
+                        '<%= config.htdocs %>'
                     ]
                 }]
-            },
-            server: '.tmp'
+            }
         },
 
         // Make sure code styles are up to par and there are no obvious mistakes
@@ -200,29 +199,42 @@ module.exports = function (grunt) {
 
         // Copies remaining files to places other tasks can use
         copy: {
-            dist: {
-                files: [{
-                    expand: true,
-                    dot: true,
-                    cwd: '<%= config.app %>',
-                    dest: '<%= config.dist %>',
-                    src: [
-                        '*.{ico,png,txt}',
-                        'images/{,*/}*.webp',
-                        '{,*/}*.html',
-                        'styles/fonts/{,*/}*.*'
-                    ]
-                }, {
-                    src: 'node_modules/apache-server-configs/dist/.htaccess',
-                    dest: '<%= config.dist %>/.htaccess'
-                }]
-            },
-            styles: {
-                expand: true,
-                dot: true,
-                cwd: '<%= config.app %>/styles',
-                dest: '.tmp/styles/',
-                src: '{,*/}*.css'
+            // swe build
+            build: {
+                files: [
+                    {
+                        cwd: '<%= config.swe %>/v2/',
+                        dest: '<%= config.htdocs %>/<%= config.assets %>/',
+                        src: '**',
+                        expand: true,
+                        flatten: false,
+                        filter: 'isFile'
+                    },
+                    {
+                        cwd: '<%= config.swe %>/includes/global/',
+                        dest: '<%= config.htdocs %>/assets/includes/global/',
+                        src: '**',
+                        expand: true,
+                        flatten: false,
+                        filter: 'isFile'
+                    },
+                    {
+                        cwd: '<%= config.swe %>/includes/nav/',
+                        dest: '<%= config.htdocs %>/assets/includes/nav/',
+                        src: '**',
+                        expand: true,
+                        flatten: false,
+                        filter: 'isFile'
+                    },
+                    {
+                        cwd: '<%= config.swe %>/images/',
+                        dest: '<%= config.htdocs %>/assets/images/',
+                        src: '**',
+                        expand: true,
+                        flatten: false,
+                        filter: 'isFile'
+                    }
+                ]
             }
         }
     });
@@ -237,7 +249,8 @@ module.exports = function (grunt) {
         }
 
         grunt.task.run([
-            'clean:server',
+            'clean:build',
+            'copy:build',
 //            'autoprefixer',
             'connect:livereload',
             'watch'
@@ -263,16 +276,12 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('build', [
-        'clean:dist',
-        'concat',
-        'cssmin',
-        'uglify',
-        'copy:dist'
+        'clean:build',
+        'copy:build'
     ]);
 
     grunt.registerTask('default', [
-        'newer:jshint',
-        'test',
-        'build'
+        'clean:build',
+        'copy:build'
     ]);
 };
