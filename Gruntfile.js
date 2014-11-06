@@ -1,14 +1,11 @@
-// Generated on 2014-11-06 using
-// generator-webapp 0.5.1
-'use strict';
-
-// # Globbing
-// for performance reasons we're only matching one level down:
-// 'test/spec/{,*/}*.js'
-// If you want to recursively match all subfolders, use:
-// 'test/spec/**/*.js'
-
 module.exports = function (grunt) {
+    'use strict';
+
+    // # Globbing
+    // for performance reasons we're only matching one level down:
+    // 'test/spec/{,*/}*.js'
+    // If you want to recursively match all subfolders, use:
+    // 'test/spec/**/*.js'
 
     // Time how long tasks take. Can help when optimizing build times
     require('time-grunt')(grunt);
@@ -20,14 +17,24 @@ module.exports = function (grunt) {
     var config = {
         app: 'app',
         dist: 'dist',
-        mode: null,
-        limit: 5,
+
         interval: 5007,
         assets: 'assets/v2',
         build: 'build/_grunt',
         htdocs: 'build/_htdocs',
         swe: '../swe_template/build/_htdocs/assets'
     };
+
+//    var host = {
+//        port: {
+//            host: 9000,
+//            test: 9001
+//        },
+//        open: true,
+//        livereload: 35729,
+//        // Change this to '0.0.0.0' to access the server from outside
+//        hostname: 'localhost'
+//    };
 
     // Define the configuration for all the tasks
     grunt.initConfig({
@@ -37,9 +44,12 @@ module.exports = function (grunt) {
 
         // Watches files for changes and runs tasks based on the changed files
         watch: {
-            bower: {
-                files: ['bower.json'],
-                tasks: ['wiredep']
+            options: {
+                interval: config.interval // https://github.com/gruntjs/grunt-contrib-watch/issues/35#issuecomment-18508836
+            },
+            gruntfile: {
+                files: 'Gruntfile.js',
+                tasks: ['jshint:gruntfile']
             },
             js: {
                 files: ['<%= config.app %>/scripts/{,*/}*.js'],
@@ -52,16 +62,13 @@ module.exports = function (grunt) {
                 files: ['test/spec/{,*/}*.js'],
                 tasks: ['test:watch']
             },
-            gruntfile: {
-                files: ['Gruntfile.js']
-            },
             sass: {
                 files: ['<%= config.app %>/styles/{,*/}*.{scss,sass}'],
-                tasks: ['sass:server', 'autoprefixer']
+                tasks: ['sass:server']
             },
             styles: {
                 files: ['<%= config.app %>/styles/{,*/}*.css'],
-                tasks: ['newer:copy:styles', 'autoprefixer']
+                tasks: ['newer:copy:styles']
             },
             livereload: {
                 options: {
@@ -119,18 +126,6 @@ module.exports = function (grunt) {
 
         // Empties folders to start fresh
         clean: {
-            base: {
-                files: [
-                    {
-                        dot: true,
-                        src: [
-                            '.tmp',
-                            '<%= config.build %>',
-                            '<%= config.htdocs %>'
-                        ]
-                    }
-                ]
-            },
             dist: {
                 files: [{
                     dot: true,
@@ -148,14 +143,12 @@ module.exports = function (grunt) {
         jshint: {
             options: {
                 jshintrc: '.jshintrc',
-                reporter: require('jshint-stylish')
+                reporter: require( 'jshint-stylish-ex' )
             },
-            all: [
-                'Gruntfile.js',
-                '<%= config.app %>/scripts/{,*/}*.js',
-                '!<%= config.app %>/scripts/vendor/*',
-                'test/spec/{,*/}*.js'
-            ]
+
+            gruntfile: {
+                src: 'Gruntfile.js'
+            }
         },
 
         // Mocha testing framework configuration options
@@ -193,71 +186,6 @@ module.exports = function (grunt) {
             }
         },
 
-        // Add vendor prefixed styles
-        autoprefixer: {
-            options: {
-                browsers: ['> 1%', 'last 2 versions', 'Firefox ESR', 'Opera 12.1']
-            },
-            dist: {
-                files: [{
-                    expand: true,
-                    cwd: '.tmp/styles/',
-                    src: '{,*/}*.css',
-                    dest: '.tmp/styles/'
-                }]
-            }
-        },
-
-        // Automatically inject Bower components into the HTML file
-        wiredep: {
-            app: {
-                ignorePath: /^\/|\.\.\//,
-                src: ['<%= config.app %>/index.html']
-            },
-            sass: {
-                src: ['<%= config.app %>/styles/{,*/}*.{scss,sass}'],
-                ignorePath: /(\.\.\/){1,2}bower_components\//
-            }
-        },
-
-        // Renames files for browser caching purposes
-        rev: {
-            dist: {
-                files: {
-                    src: [
-                        '<%= config.dist %>/scripts/{,*/}*.js',
-                        '<%= config.dist %>/styles/{,*/}*.css',
-                        '<%= config.dist %>/images/{,*/}*.*',
-                        '<%= config.dist %>/styles/fonts/{,*/}*.*',
-                        '<%= config.dist %>/*.{ico,png}'
-                    ]
-                }
-            }
-        },
-
-        // Reads HTML for usemin blocks to enable smart builds that automatically
-        // concat, minify and revision files. Creates configurations in memory so
-        // additional tasks can operate on them
-        useminPrepare: {
-            options: {
-                dest: '<%= config.dist %>'
-            },
-            html: '<%= config.app %>/index.html'
-        },
-
-        // Performs rewrites based on rev and the useminPrepare configuration
-        usemin: {
-            options: {
-                assetsDirs: [
-                    '<%= config.dist %>',
-                    '<%= config.dist %>/images',
-                    '<%= config.dist %>/styles'
-                ]
-            },
-            html: ['<%= config.dist %>/{,*/}*.html'],
-            css: ['<%= config.dist %>/styles/{,*/}*.css']
-        },
-
         // The following *-min tasks produce minified files in the dist folder
         imagemin: {
             dist: {
@@ -270,104 +198,8 @@ module.exports = function (grunt) {
             }
         },
 
-        svgmin: {
-            dist: {
-                files: [{
-                    expand: true,
-                    cwd: '<%= config.app %>/images',
-                    src: '{,*/}*.svg',
-                    dest: '<%= config.dist %>/images'
-                }]
-            }
-        },
-
-        htmlmin: {
-            dist: {
-                options: {
-                    collapseBooleanAttributes: true,
-                    collapseWhitespace: true,
-                    conservativeCollapse: true,
-                    removeAttributeQuotes: true,
-                    removeCommentsFromCDATA: true,
-                    removeEmptyAttributes: true,
-                    removeOptionalTags: true,
-                    removeRedundantAttributes: true,
-                    useShortDoctype: true
-                },
-                files: [{
-                    expand: true,
-                    cwd: '<%= config.dist %>',
-                    src: '{,*/}*.html',
-                    dest: '<%= config.dist %>'
-                }]
-            }
-        },
-
-        // By default, your `index.html`'s <!-- Usemin block --> will take care
-        // of minification. These next options are pre-configured if you do not
-        // wish to use the Usemin blocks.
-        // cssmin: {
-        //   dist: {
-        //     files: {
-        //       '<%= config.dist %>/styles/main.css': [
-        //         '.tmp/styles/{,*/}*.css',
-        //         '<%= config.app %>/styles/{,*/}*.css'
-        //       ]
-        //     }
-        //   }
-        // },
-        // uglify: {
-        //   dist: {
-        //     files: {
-        //       '<%= config.dist %>/scripts/scripts.js': [
-        //         '<%= config.dist %>/scripts/scripts.js'
-        //       ]
-        //     }
-        //   }
-        // },
-        // concat: {
-        //   dist: {}
-        // },
-
         // Copies remaining files to places other tasks can use
         copy: {
-            // main
-            main: {
-                files: [
-                    {
-                        cwd: '<%= config.swe %>/v2/',
-                        dest: '<%= config.htdocs %>/<%= config.assets %>/',
-                        src: '**',
-                        expand: true,
-                        flatten: false,
-                        filter: 'isFile'
-                    },
-                    {
-                        cwd: '<%= config.swe %>/includes/global/',
-                        dest: '<%= config.htdocs %>/assets/includes/global/',
-                        src: '**',
-                        expand: true,
-                        flatten: false,
-                        filter: 'isFile'
-                    },
-                    {
-                        cwd: '<%= config.swe %>/includes/nav/',
-                        dest: '<%= config.htdocs %>/assets/includes/nav/',
-                        src: '**',
-                        expand: true,
-                        flatten: false,
-                        filter: 'isFile'
-                    },
-                    {
-                        cwd: '<%= config.swe %>/images/',
-                        dest: '<%= config.htdocs %>/assets/images/',
-                        src: '**',
-                        expand: true,
-                        flatten: false,
-                        filter: 'isFile'
-                    }
-                ]
-            },
             dist: {
                 files: [{
                     expand: true,
@@ -405,11 +237,7 @@ module.exports = function (grunt) {
         }
 
         grunt.task.run([
-            'clean:base',
-            'copy:main',
-//            'clean:server',
-//            'wiredep',
-//            'concurrent:server',
+            'clean:server',
 //            'autoprefixer',
             'connect:livereload',
             'watch'
@@ -421,8 +249,30 @@ module.exports = function (grunt) {
         grunt.task.run([target ? ('serve:' + target) : 'serve']);
     });
 
+    grunt.registerTask('test', function (target) {
+        if (target !== 'watch') {
+            grunt.task.run([
+                'clean:server',
+            ]);
+        }
+
+        grunt.task.run([
+            'connect:test',
+            'mocha'
+        ]);
+    });
+
+    grunt.registerTask('build', [
+        'clean:dist',
+        'concat',
+        'cssmin',
+        'uglify',
+        'copy:dist'
+    ]);
+
     grunt.registerTask('default', [
-        'clean:base',
-        'copy:main'
+        'newer:jshint',
+        'test',
+        'build'
     ]);
 };
