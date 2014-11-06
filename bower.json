@@ -1,0 +1,20 @@
+{
+  "name": "emergency-services-app",
+  "version": "1.0.0",
+  "homepage": "https://github.com/qld-gov-au/emergency-services-app",
+  "authors": [
+    "Smart Service Queensland"
+  ],
+  "license": "BSD",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "es5-shim": "~4.0.3"
+  }
+}

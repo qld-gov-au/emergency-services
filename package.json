@@ -1,0 +1,19 @@
+{
+  "name": "emergency-services-app",
+  "version": "1.0.0",
+  "description": "emergency-services-app\r ======================",
+  "main": "Gruntfile.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qld-gov-au/emergency-services-app.git"
+  },
+  "author": "Smart Service Queensland",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/qld-gov-au/emergency-services-app/issues"
+  },
+  "homepage": "https://github.com/qld-gov-au/emergency-services-app"
+}
