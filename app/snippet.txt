@@ -1,0 +1,8 @@
+<div class="content-row announcements">
+    <div class="content-module">
+        <div class="section-header">
+            <h2>Emergency news</h2>
+        </div>
+        <div class="slide-runner"></div>
+    </div>
+</div>
