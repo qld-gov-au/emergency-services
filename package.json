@@ -22,5 +22,6 @@
     "load-grunt-config": "^0.16.0",
     "load-grunt-tasks": "^1.0.0",
     "time-grunt": "^1.0.0"
-  }
+  },
+  "devDependencies": {}
 }

@@ -3,7 +3,7 @@ bower_components/
 *.log
 
 app/
-dist/
+build/
 
 .idea
 *.bak*
