@@ -52,9 +52,10 @@ module.exports = function (grunt) {
                         options: {
                             middleware: function(connect) {
                                 return [
-                                    connect.static('.tmp'),
-                                    connect().use('/bower_components', connect.static('./bower_components')),
-                                    connect.static(config.htdocs)
+                                    //connect.static('.tmp'),
+                                    //connect().use('/bower_components', connect.static('./bower_components')),
+                                    //connect.static(config.htdocs)
+                                    connect.static('<%= config.htdocs %>')
                                 ];
                             }
                         }
@@ -146,6 +147,30 @@ module.exports = function (grunt) {
 
     // Time how long tasks take. Can help when optimizing build times
     require('time-grunt')(grunt);
+
+    grunt.registerTask('serve', 'start the server and preview your app, --allow-remote for remote access', function (target) {
+        if (grunt.option('allow-remote')) {
+            grunt.config.set('connect.options.hostname', '0.0.0.0');
+        }
+        if (target === 'dist') {
+            return grunt.task.run(['build', 'connect:dist:keepalive']);
+        }
+
+        grunt.task.run([
+            'clean:base',
+            'copy:main',
+//            'wiredep',
+//            'concurrent:server',
+//            'autoprefixer',
+            'connect:livereload',
+            'watch'
+        ]);
+    });
+
+    grunt.registerTask('server', function (target) {
+        grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
+        grunt.task.run([target ? ('serve:' + target) : 'serve']);
+    });
 
     // default task
     grunt.registerTask('default', [
