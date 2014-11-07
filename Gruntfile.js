@@ -13,6 +13,9 @@ module.exports = function (grunt) {
     // Load grunt tasks automatically
     require('load-grunt-tasks')(grunt);
 
+    // Connect include
+    //var include = require('connect-include');
+
     // Configurable paths
     var config = {
         app: 'app',
@@ -74,80 +77,47 @@ module.exports = function (grunt) {
         // The actual grunt server settings
         connect: {
             options: {
-                base: './',
+                base: 'build',
                 port: 9000,
                 open: true,
                 livereload: 35729,
                 // Change this to '0.0.0.0' to access the server from outside
-                hostname: 'localhost',
-                middleware: function( connect, options, middlewares ) {
-                    options = options || {};
-                    options.index = options.index || 'index.html';
-                    middlewares.unshift(function globalIncludes( req, res, next ) {
-                        var fs = require('fs');
-                        var filename = require( 'url' ).parse( req.url ).pathname;
-                        if ( /\/$/.test( filename )) {
-                            filename += options.index;
-                        }
-
-                        if ( /\.html$/.test( filename )) {
-                            fs.readFile( options.base + filename, 'utf-8', function( err, data ) {
-                                if ( err ) {
-                                    next( err );
-                                } else {
-                                    res.writeHead( 200, { 'Content-Type': 'text/html' });
-                                    data = data.split( '<!--#include virtual="/assets/includes/global/' );
-                                    res.write( data.shift(), 'utf-8' );
-                                    data.forEach(function( chunk ) {
-                                        res.write( fs.readFileSync( options.base + '/assets/includes/global/' + chunk.substring( 0, chunk.indexOf( '"-->' )), 'utf-8' ), 'utf-8' );
-                                        res.write( chunk.substring( chunk.indexOf( '-->' ) + 3 ), 'utf-8' );
-                                    });
-                                    res.end();
-                                }
-                            });
-
-                        } else {
-                            next();
-                        }
-                    });
-                    return middlewares;
-                }
+                hostname: 'localhost'
             },
             livereload: {
                 options: {
-//                    middleware: function(connect) {
                     middleware: function( connect, options, middlewares ) {
-//                        return [
-//                            //connect.static('.tmp'),
-//                            //connect().use('/bower_components', connect.static('./bower_components')),
-//                            //connect.static(config.build)
-//                            connect.static('/')
-//                        ];
+                        options = options || {};
+                        options.index = options.index || 'index.html';
+                        middlewares.unshift(function globalIncludes( req, res, next ) {
+                            var fs = require('fs');
+                            var filename = require( 'url' ).parse( req.url ).pathname;
+                            if ( /\/$/.test( filename )) {
+                                filename += options.index;
+                            }
 
-                        middlewares.unshift(connect.static('build'));
-                        console.log(middlewares);
+                            if ( /\.html$/.test( filename )) {
+                                fs.readFile( options.base + filename, 'utf-8', function( err, data ) {
+                                    if ( err ) {
+                                        next( err );
+                                    } else {
+                                        res.writeHead( 200, { 'Content-Type': 'text/html' });
+                                        data = data.split( '<!--#include virtual="/assets/includes/global/' );
+                                        res.write( data.shift(), 'utf-8' );
+                                        data.forEach(function( chunk ) {
+                                            res.write( fs.readFileSync( options.base + '/assets/includes/global/' + chunk.substring( 0, chunk.indexOf( '"-->' )), 'utf-8' ), 'utf-8' );
+                                            res.write( chunk.substring( chunk.indexOf( '-->' ) + 3 ), 'utf-8' );
+                                        });
+                                        res.end();
+                                    }
+                                });
+
+                            } else {
+                                next();
+                            }
+                        });
                         return middlewares;
                     }
-                }
-            },
-            test: {
-                options: {
-                    open: false,
-                    port: 9001,
-                    middleware: function(connect) {
-                        return [
-                            connect.static('.tmp'),
-                            connect.static('test'),
-                            connect().use('/bower_components', connect.static('./bower_components')),
-                            connect.static(config.app)
-                        ];
-                    }
-                }
-            },
-            dist: {
-                options: {
-                    base: '<%= config.dist %>',
-                    livereload: false
                 }
             }
         },
@@ -268,7 +238,7 @@ module.exports = function (grunt) {
                     expand: true,
                     dot: true,
                     cwd: '<%= config.app %>',
-                    dest: '<%= config.build %>/emergency',
+                    dest: '<%= config.build %>',
                     src: [
                         '{,*/}*.html',
                         'assets/images/**/*.*',
