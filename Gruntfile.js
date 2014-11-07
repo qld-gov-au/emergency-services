@@ -17,24 +17,12 @@ module.exports = function (grunt) {
     var config = {
         app: 'app',
         dist: 'dist',
-
-        interval: 5007,
+        temp: '.tmp',
+        build: 'build',
         assets: 'assets/v2',
-        build: 'build/_grunt',
-        htdocs: 'build/_htdocs',
-        swe: '../swe_template/build/_htdocs/assets'
+        swe: '../swe_template/build/_htdocs/assets',
+        interval: 5007
     };
-
-//    var host = {
-//        port: {
-//            host: 9000,
-//            test: 9001
-//        },
-//        open: true,
-//        livereload: 35729,
-//        // Change this to '0.0.0.0' to access the server from outside
-//        hostname: 'localhost'
-//    };
 
     // Define the configuration for all the tasks
     grunt.initConfig({
@@ -77,7 +65,8 @@ module.exports = function (grunt) {
                 files: [
                     '<%= config.app %>/{,*/}*.html',
                     '.tmp/styles/{,*/}*.css',
-                    '<%= config.app %>/images/{,*/}*'
+                    '<%= config.app %>/images/{,*/}*',
+                    '<%= config.app %>/includes/{,*/}*'
                 ]
             }
         },
@@ -85,20 +74,59 @@ module.exports = function (grunt) {
         // The actual grunt server settings
         connect: {
             options: {
+                base: './',
                 port: 9000,
                 open: true,
                 livereload: 35729,
                 // Change this to '0.0.0.0' to access the server from outside
-                hostname: 'localhost'
+                hostname: 'localhost',
+                middleware: function( connect, options, middlewares ) {
+                    options = options || {};
+                    options.index = options.index || 'index.html';
+                    middlewares.unshift(function globalIncludes( req, res, next ) {
+                        var fs = require('fs');
+                        var filename = require( 'url' ).parse( req.url ).pathname;
+                        if ( /\/$/.test( filename )) {
+                            filename += options.index;
+                        }
+
+                        if ( /\.html$/.test( filename )) {
+                            fs.readFile( options.base + filename, 'utf-8', function( err, data ) {
+                                if ( err ) {
+                                    next( err );
+                                } else {
+                                    res.writeHead( 200, { 'Content-Type': 'text/html' });
+                                    data = data.split( '<!--#include virtual="/assets/includes/global/' );
+                                    res.write( data.shift(), 'utf-8' );
+                                    data.forEach(function( chunk ) {
+                                        res.write( fs.readFileSync( options.base + '/assets/includes/global/' + chunk.substring( 0, chunk.indexOf( '"-->' )), 'utf-8' ), 'utf-8' );
+                                        res.write( chunk.substring( chunk.indexOf( '-->' ) + 3 ), 'utf-8' );
+                                    });
+                                    res.end();
+                                }
+                            });
+
+                        } else {
+                            next();
+                        }
+                    });
+                    return middlewares;
+                }
             },
             livereload: {
                 options: {
-                    middleware: function(connect) {
-                        return [
-                            connect.static('.tmp'),
-                            connect().use('/bower_components', connect.static('./bower_components')),
-                            connect.static(config.app)
-                        ];
+//                    middleware: function(connect) {
+                    middleware: function( connect, options, middlewares ) {
+//                        return [
+//                            //connect.static('.tmp'),
+//                            //connect().use('/bower_components', connect.static('./bower_components')),
+//                            //connect.static(config.build)
+//                            connect.static('/')
+//                        ];
+
+                        middlewares.unshift(connect.static('build'));
+                        console.log(middlewares);
+                        return middlewares;
                     }
                 }
             },
@@ -130,9 +158,8 @@ module.exports = function (grunt) {
                 files: [{
                     dot: true,
                     src: [
-                        '.tmp',
-                        '<%= config.build %>',
-                        '<%= config.htdocs %>'
+                        '<%= config.temp %>',
+                        '<%= config.build %>'
                     ]
                 }]
             }
@@ -204,7 +231,7 @@ module.exports = function (grunt) {
                 files: [
                     {
                         cwd: '<%= config.swe %>/v2/',
-                        dest: '<%= config.htdocs %>/<%= config.assets %>/',
+                        dest: '<%= config.build %>/<%= config.assets %>/',
                         src: '**',
                         expand: true,
                         flatten: false,
@@ -212,7 +239,7 @@ module.exports = function (grunt) {
                     },
                     {
                         cwd: '<%= config.swe %>/includes/global/',
-                        dest: '<%= config.htdocs %>/assets/includes/global/',
+                        dest: '<%= config.build %>/assets/includes/global/',
                         src: '**',
                         expand: true,
                         flatten: false,
@@ -220,7 +247,7 @@ module.exports = function (grunt) {
                     },
                     {
                         cwd: '<%= config.swe %>/includes/nav/',
-                        dest: '<%= config.htdocs %>/assets/includes/nav/',
+                        dest: '<%= config.build %>/assets/includes/nav/',
                         src: '**',
                         expand: true,
                         flatten: false,
@@ -228,13 +255,26 @@ module.exports = function (grunt) {
                     },
                     {
                         cwd: '<%= config.swe %>/images/',
-                        dest: '<%= config.htdocs %>/assets/images/',
+                        dest: '<%= config.build %>/assets/images/',
                         src: '**',
                         expand: true,
                         flatten: false,
                         filter: 'isFile'
                     }
                 ]
+            },
+            app: {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    cwd: '<%= config.app %>',
+                    dest: '<%= config.build %>/emergency',
+                    src: [
+                        '{,*/}*.html',
+                        'assets/images/**/*.*',
+                        'assets/includes/**/*.*'
+                    ]
+                }]
             }
         }
     });
@@ -251,6 +291,7 @@ module.exports = function (grunt) {
         grunt.task.run([
             'clean:build',
             'copy:build',
+            'copy:app',
 //            'autoprefixer',
             'connect:livereload',
             'watch'
