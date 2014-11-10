@@ -1,3 +1,5 @@
+/* jshint unused:false, loopfunc:true */
+
 module.exports = function (grunt) {
     'use strict';
 
@@ -24,7 +26,13 @@ module.exports = function (grunt) {
         build: 'build',
         assets: 'assets/v2',
         swe: '../swe_template/build/_htdocs/assets',
+        directory: 'emergency',
         interval: 5007
+    };
+
+    var includes = {
+        global: '/assets/includes/global/'
+        //emergency: '/emergency/assets/includes/'
     };
 
     // Define the configuration for all the tasks
@@ -43,8 +51,8 @@ module.exports = function (grunt) {
                 tasks: ['jshint:gruntfile']
             },
             js: {
-                files: ['<%= config.app %>/scripts/{,*/}*.js'],
-                tasks: ['jshint'],
+                files: ['<%= config.app %>/assets/script/{,*/}*.js'],
+                tasks: ['jshint:app'],
                 options: {
                     livereload: true
                 }
@@ -54,22 +62,26 @@ module.exports = function (grunt) {
                 tasks: ['test:watch']
             },
             sass: {
-                files: ['<%= config.app %>/styles/{,*/}*.{scss,sass}'],
+                files: ['<%= config.app %>/assets/sass/{,*/}*.{scss,sass}'],
                 tasks: ['sass:server']
             },
             styles: {
-                files: ['<%= config.app %>/styles/{,*/}*.css'],
+                files: ['<%= config.app %>/assets/style/{,*/}*.css'],
                 tasks: ['newer:copy:styles']
+            },
+            html: {
+                files: ['<%= config.app %>/{,*/}*.html'],
+                tasks: ['newer:copy:html']
             },
             livereload: {
                 options: {
                     livereload: '<%= connect.options.livereload %>'
                 },
                 files: [
-                    '<%= config.app %>/{,*/}*.html',
                     '.tmp/styles/{,*/}*.css',
-                    '<%= config.app %>/images/{,*/}*',
-                    '<%= config.app %>/includes/{,*/}*'
+                    '<%= config.build %>/{,*/}*.html',
+                    '<%= config.build %>/assets/images/{,*/}*',
+                    '<%= config.build %>/assets/includes/{,*/}*'
                 ]
             }
         },
@@ -86,27 +98,38 @@ module.exports = function (grunt) {
             },
             livereload: {
                 options: {
-                    middleware: function( connect, options, middlewares ) {
+                    open: {
+                        target: 'http://localhost:9000/<%= config.directory %>' // target url to open
+                    },
+                    middleware: function (connect, options, middlewares) {
                         options = options || {};
                         options.index = options.index || 'index.html';
-                        middlewares.unshift(function globalIncludes( req, res, next ) {
+                        middlewares.unshift(function globalIncludes(req, res, next) {
                             var fs = require('fs');
-                            var filename = require( 'url' ).parse( req.url ).pathname;
-                            if ( /\/$/.test( filename )) {
+                            var filename = require('url').parse(req.url).pathname;
+                            var split = function (data, include) {
+                                data = data.split('<!--#include virtual="' + include);
+                                return data;
+                            };
+
+                            if (/\/$/.test(filename)) {
                                 filename += options.index;
                             }
 
-                            if ( /\.html$/.test( filename )) {
-                                fs.readFile( options.base + filename, 'utf-8', function( err, data ) {
-                                    if ( err ) {
-                                        next( err );
+                            if (/\.html$/.test(filename)) {
+                                fs.readFile(options.base + filename, 'utf-8', function (err, data) {
+                                    if (err) {
+                                        next(err);
                                     } else {
-                                        res.writeHead( 200, { 'Content-Type': 'text/html' });
-                                        data = data.split( '<!--#include virtual="/assets/includes/global/' );
-                                        res.write( data.shift(), 'utf-8' );
-                                        data.forEach(function( chunk ) {
-                                            res.write( fs.readFileSync( options.base + '/assets/includes/global/' + chunk.substring( 0, chunk.indexOf( '"-->' )), 'utf-8' ), 'utf-8' );
-                                            res.write( chunk.substring( chunk.indexOf( '-->' ) + 3 ), 'utf-8' );
+                                        res.writeHead(200, { 'Content-Type': 'text/html' });
+                                        Object.keys(includes).forEach(function(element, key, _array) {
+                                            var include = includes[element];
+                                            var content = split(data, include);
+                                            res.write(content.shift(), 'utf-8');
+                                            content.forEach(function (chunk) {
+                                                res.write(fs.readFileSync(options.base + include + chunk.substring(0, chunk.indexOf('"-->')), 'utf-8'), 'utf-8');
+                                                res.write(chunk.substring(chunk.indexOf('-->') + 3), 'utf-8');
+                                            });
                                         });
                                         res.end();
                                     }
@@ -139,11 +162,13 @@ module.exports = function (grunt) {
         jshint: {
             options: {
                 jshintrc: '.jshintrc',
-                reporter: require( 'jshint-stylish-ex' )
+                reporter: require('jshint-stylish-ex')
             },
-
             gruntfile: {
                 src: 'Gruntfile.js'
+            },
+            app: {
+                src: '<%= config.app %>/assets/script/{,*/}*.js'
             }
         },
 
@@ -238,11 +263,22 @@ module.exports = function (grunt) {
                     expand: true,
                     dot: true,
                     cwd: '<%= config.app %>',
-                    dest: '<%= config.build %>',
+                    dest: '<%= config.build %>/emergency',
                     src: [
                         '{,*/}*.html',
                         'assets/images/**/*.*',
                         'assets/includes/**/*.*'
+                    ]
+                }]
+            },
+            html: {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    cwd: '<%= config.app %>',
+                    dest: '<%= config.build %>/emergency',
+                    src: [
+                        '{,*/}*.html'
                     ]
                 }]
             }
