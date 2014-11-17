@@ -1,4 +1,4 @@
-/* jshint unused:false, loopfunc:true */
+/* jshint unused:false, loopfunc:true, newcap:false */
 
 module.exports = function (grunt) {
     'use strict';
@@ -16,7 +16,7 @@ module.exports = function (grunt) {
     require('load-grunt-tasks')(grunt);
 
     // Connect include
-    //var include = require('connect-include');
+    var ssInclude = require('connect-include');
 
     // Configurable paths
     var config = {
@@ -88,10 +88,27 @@ module.exports = function (grunt) {
             }
         },
 
+        ssi: {
+            build: {
+                options: {
+                    cache: 'all',
+                    ext: '.html',
+                    baseDir: 'build',
+                    cacheDir: '.tmp/cache'
+                },
+                files: [{
+                    expand: true,
+                    cwd: 'build/emergency',
+                    src: ['*.html'],
+                    dest: 'build/emergency'
+                }]
+            }
+        },
+
         // The actual grunt server settings
         connect: {
             options: {
-                base: 'build',
+                base: '.tmp',
                 port: 9000,
                 open: true,
                 livereload: 35729,
@@ -102,46 +119,6 @@ module.exports = function (grunt) {
                 options: {
                     open: {
                         target: 'http://localhost:9000/<%= config.directory %>' // target url to open
-                    },
-                    middleware: function (connect, options, middlewares) {
-                        options = options || {};
-                        options.index = options.index || 'index.html';
-                        middlewares.unshift(function globalIncludes(req, res, next) {
-                            var fs = require('fs');
-                            var filename = require('url').parse(req.url).pathname;
-                            var split = function (data, include) {
-                                data = data.split('<!--#include virtual="' + include);
-                                return data;
-                            };
-
-                            if (/\/$/.test(filename)) {
-                                filename += options.index;
-                            }
-
-                            if (/\.html$/.test(filename)) {
-                                fs.readFile(options.base + filename, 'utf-8', function (err, data) {
-                                    if (err) {
-                                        next(err);
-                                    } else {
-                                        res.writeHead(200, { 'Content-Type': 'text/html' });
-                                        Object.keys(includes).forEach(function(element, key, _array) {
-                                            var include = includes[element];
-                                            var content = split(data, include);
-                                            res.write(content.shift(), 'utf-8');
-                                            content.forEach(function (chunk) {
-                                                res.write(fs.readFileSync(options.base + include + chunk.substring(0, chunk.indexOf('"-->')), 'utf-8'), 'utf-8');
-                                                res.write(chunk.substring(chunk.indexOf('-->') + 3), 'utf-8');
-                                            });
-                                        });
-                                        res.end();
-                                    }
-                                });
-
-                            } else {
-                                next();
-                            }
-                        });
-                        return middlewares;
                     }
                 }
             }
@@ -288,7 +265,7 @@ module.exports = function (grunt) {
                     }
                 ]
             },
-            app: {
+            src: {
                 files: [{
                     expand: true,
                     dot: true,
@@ -356,11 +333,13 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:build',
-        'copy:build'
+        'copy:build',
+        'copy:src'
     ]);
 
     grunt.registerTask('default', [
         'clean:build',
-        'copy:build'
+        'copy:build',
+        'copy:src'
     ]);
 };
