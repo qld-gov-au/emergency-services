@@ -297,7 +297,8 @@ module.exports = function (grunt) {
                     src: [
                         '{,*/}*.html',
                         'assets/images/**/*.*',
-                        'assets/includes/**/*.*'
+                        'assets/includes/**/*.*',
+                        '!_bak/**'
                     ]
                 }]
             },
@@ -308,7 +309,8 @@ module.exports = function (grunt) {
                     cwd: '<%= config.app %>',
                     dest: '<%= config.dist %>/emergency',
                     src: [
-                        '{,*/}*.html'
+                        '{,*/}*.html',
+                        '!_bak/**'
                     ]
                 }]
             }
