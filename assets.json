@@ -1,0 +1,18 @@
+{
+    "js": {
+        "emergencyNewsroomApp": [
+            "bower_components/es5-shim/es5-shim.js",
+            "bower_components/es5-shim/es5-sham.js",
+            "bower_components/jQuery.XDomainRequest/jQuery.XDomainRequest.js",
+            "bower_components/console-polyfill/index.js",
+            "bower_components/html5-boilerplate/js/plugins.js",
+            "bower_components/escapify/lib/jquery.escapify.js",
+            "bower_components/json3/lib/json3.js",
+            "bower_components/datejs/build/date.js",
+            "bower_components/react/react.js",
+            "src/assets/script/xml2json.js",
+            "src/assets/script/mocks.js",
+            "src/assets/script/app.beta.js"
+        ]
+    }
+}

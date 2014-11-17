@@ -20,10 +20,9 @@ module.exports = function (grunt) {
 
     // Configurable paths
     var config = {
-        app: 'app',
-        dist: 'dist',
+        app: 'src',
+        dist: 'build',
         temp: '.tmp',
-        build: 'build',
         assets: 'assets/v2',
         swe: '../swe_template/build/_htdocs/assets',
         directory: 'emergency',
@@ -41,6 +40,9 @@ module.exports = function (grunt) {
         // Project settings
         config: config,
 
+        // Assets
+        assets: grunt.file.readJSON( 'assets.json' ),
+
         // Watches files for changes and runs tasks based on the changed files
         watch: {
             options: {
@@ -52,7 +54,7 @@ module.exports = function (grunt) {
             },
             js: {
                 files: ['<%= config.app %>/assets/script/{,*/}*.js'],
-                tasks: ['jshint:app'],
+                tasks: ['jshint:app', ],
                 options: {
                     livereload: true
                 }
@@ -79,9 +81,9 @@ module.exports = function (grunt) {
                 },
                 files: [
                     '.tmp/styles/{,*/}*.css',
-                    '<%= config.build %>/{,*/}*.html',
-                    '<%= config.build %>/assets/images/{,*/}*',
-                    '<%= config.build %>/assets/includes/{,*/}*'
+                    '<%= config.dist %>/{,*/}*.html',
+                    '<%= config.dist %>/assets/images/{,*/}*',
+                    '<%= config.dist %>/assets/includes/{,*/}*'
                 ]
             }
         },
@@ -152,7 +154,7 @@ module.exports = function (grunt) {
                     dot: true,
                     src: [
                         '<%= config.temp %>',
-                        '<%= config.build %>'
+                        '<%= config.dist %>'
                     ]
                 }]
             }
@@ -219,6 +221,34 @@ module.exports = function (grunt) {
             }
         },
 
+        concat: {
+            app: {
+                //options: '<%= concat.js.options %>',
+                files: {
+                    '<%= config.temp %>/assets/script/app.beta.js': '<%= assets.js.emergencyNewsroomApp %>'
+                }
+            }
+        },
+
+        uglify: {
+            options: {
+                beautify: true,
+                mangle: true,
+                preserveComments: false,
+                compress: {
+                    global_defs: {
+                        TEST: false
+                    },
+                    dead_code: true
+                }
+            },
+            app: {
+                files: {
+                    '<%= config.dist %>/assets/emergency/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
+                }
+            }
+        },
+
         // Copies remaining files to places other tasks can use
         copy: {
             // swe build
@@ -226,7 +256,7 @@ module.exports = function (grunt) {
                 files: [
                     {
                         cwd: '<%= config.swe %>/v2/',
-                        dest: '<%= config.build %>/<%= config.assets %>/',
+                        dest: '<%= config.dist %>/<%= config.assets %>/',
                         src: '**',
                         expand: true,
                         flatten: false,
@@ -234,7 +264,7 @@ module.exports = function (grunt) {
                     },
                     {
                         cwd: '<%= config.swe %>/includes/global/',
-                        dest: '<%= config.build %>/assets/includes/global/',
+                        dest: '<%= config.dist %>/assets/includes/global/',
                         src: '**',
                         expand: true,
                         flatten: false,
@@ -242,7 +272,7 @@ module.exports = function (grunt) {
                     },
                     {
                         cwd: '<%= config.swe %>/includes/nav/',
-                        dest: '<%= config.build %>/assets/includes/nav/',
+                        dest: '<%= config.dist %>/assets/includes/nav/',
                         src: '**',
                         expand: true,
                         flatten: false,
@@ -250,7 +280,7 @@ module.exports = function (grunt) {
                     },
                     {
                         cwd: '<%= config.swe %>/images/',
-                        dest: '<%= config.build %>/assets/images/',
+                        dest: '<%= config.dist %>/assets/images/',
                         src: '**',
                         expand: true,
                         flatten: false,
@@ -263,7 +293,7 @@ module.exports = function (grunt) {
                     expand: true,
                     dot: true,
                     cwd: '<%= config.app %>',
-                    dest: '<%= config.build %>/emergency',
+                    dest: '<%= config.dist %>/emergency',
                     src: [
                         '{,*/}*.html',
                         'assets/images/**/*.*',
@@ -276,7 +306,7 @@ module.exports = function (grunt) {
                     expand: true,
                     dot: true,
                     cwd: '<%= config.app %>',
-                    dest: '<%= config.build %>/emergency',
+                    dest: '<%= config.dist %>/emergency',
                     src: [
                         '{,*/}*.html'
                     ]
