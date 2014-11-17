@@ -73,7 +73,7 @@ module.exports = function (grunt) {
             },
             html: {
                 files: ['<%= config.app %>/{,*/}*.html'],
-                tasks: ['newer:copy:html']
+                tasks: ['newer:copy:html', 'newer:ssi:build']
             },
             livereload: {
                 options: {
@@ -88,13 +88,14 @@ module.exports = function (grunt) {
             }
         },
 
+        // https://www.npmjs.org/package/grunt-ssi
         ssi: {
             build: {
                 options: {
                     cache: 'all',
                     ext: '.html',
                     baseDir: 'build',
-                    cacheDir: '.tmp/cache'
+                    cacheDir: '.tmp/ssi'
                 },
                 files: [{
                     expand: true,
@@ -108,7 +109,7 @@ module.exports = function (grunt) {
         // The actual grunt server settings
         connect: {
             options: {
-                base: '.tmp',
+                base: 'build',
                 port: 9000,
                 open: true,
                 livereload: 35729,
@@ -270,7 +271,7 @@ module.exports = function (grunt) {
                     expand: true,
                     dot: true,
                     cwd: '<%= config.app %>',
-                    dest: '<%= config.dist %>/emergency',
+                    dest: '<%= config.dist %>/<%= config.directory %>',
                     src: [
                         '{,*/}*.html',
                         'assets/images/**/*.*',
@@ -306,7 +307,8 @@ module.exports = function (grunt) {
         grunt.task.run([
             'clean:build',
             'copy:build',
-            'copy:app',
+            'copy:src',
+            'ssi:build',
 //            'autoprefixer',
             'connect:livereload',
             'watch'
@@ -321,7 +323,7 @@ module.exports = function (grunt) {
     grunt.registerTask('test', function (target) {
         if (target !== 'watch') {
             grunt.task.run([
-                'clean:server',
+                'clean:build'
             ]);
         }
 
