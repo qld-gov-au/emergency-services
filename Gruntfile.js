@@ -26,7 +26,8 @@ module.exports = function (grunt) {
         interval: 5007
     };
 
-    var includes = {
+    // Banner
+    var banner = {
         global: '/assets/includes/global/'
         //emergency: '/emergency/assets/includes/'
     };
@@ -38,7 +39,10 @@ module.exports = function (grunt) {
         config: config,
 
         // Assets
-        assets: grunt.file.readJSON( 'assets.json' ),
+        assets: grunt.file.readJSON('assets.json'),
+
+        // Package
+        package: grunt.file.readJSON('package.json'),
 
         // Watches files for changes and runs tasks based on the changed files
         watch: {
@@ -50,8 +54,11 @@ module.exports = function (grunt) {
                 tasks: ['jshint:gruntfile']
             },
             js: {
-                files: ['<%= config.app %>/assets/script/{,*/}*.js'],
-                tasks: ['jshint:app', ],
+                files: [
+                    'assets.json',
+                    '<%= config.app %>/assets/script/{,*/}*.js'
+                ],
+                tasks: ['jshint:app', 'concat:app', 'uglify:app' ],
                 options: {
                     livereload: true
                 }
@@ -77,10 +84,10 @@ module.exports = function (grunt) {
                     livereload: '<%= connect.options.livereload %>'
                 },
                 files: [
-                    '.tmp/styles/{,*/}*.css',
                     '<%= config.dist %>/{,*/}*.html',
                     '<%= config.dist %>/assets/images/{,*/}*',
-                    '<%= config.dist %>/assets/includes/{,*/}*'
+                    '<%= config.dist %>/assets/includes/{,*/}*',
+                    '<%= config.dist %>/assets/<%= config.directory %>/newsroom/{,*/}*'
                 ]
             }
         },
@@ -233,8 +240,11 @@ module.exports = function (grunt) {
         },
 
         concat: {
+            options: {
+                banner: '<%= banner %>',
+                stripBanners: true
+            },
             app: {
-                //options: '<%= concat.js.options %>',
                 files: {
                     '<%= config.temp %>/assets/script/app.beta.js': '<%= assets.js.emergencyNewsroomApp %>'
                 }
@@ -245,7 +255,7 @@ module.exports = function (grunt) {
             app: {
                 options: {
                     beautify: true,
-                    mangle: true,
+                    mangle: false,
                     preserveComments: false,
                     compress: {
                         global_defs: {
@@ -355,6 +365,8 @@ module.exports = function (grunt) {
             'copy:build',
             'copy:src',
             'ssi:build',
+            'concat:app',
+            'uglify:app',
 //            'autoprefixer',
             'connect:livereload',
             'watch'
