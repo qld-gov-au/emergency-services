@@ -23,6 +23,7 @@ module.exports = function (grunt) {
         assets: 'assets/v2',
         swe: '../swe_template/build/_htdocs/assets',
         directory: 'emergency',
+        script: 'app.beta.js',
         interval: 5007
     };
 
@@ -246,7 +247,7 @@ module.exports = function (grunt) {
                     stripBanners: true
                 },
                 files: {
-                    '<%= config.dist %>/assets/<%= config.directory %>/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
+                    '<%= config.dist %>/assets/<%= config.directory %>/newsroom/<%= config.script %>': '<%= config.temp %>/assets/script/<%= config.script %>'
                 }
             },
             build: {
@@ -272,7 +273,7 @@ module.exports = function (grunt) {
                     }
                 },
                 files: {
-                    '<%= config.temp %>/assets/script/app.beta.js': '<%= assets.js.emergencyNewsroomApp %>'
+                    '<%= config.temp %>/assets/script/<%= config.script %>': '<%= assets.js.emergencyNewsroomApp %>'
                 }
             },
             build: {
