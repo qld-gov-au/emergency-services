@@ -26,12 +26,6 @@ module.exports = function (grunt) {
         interval: 5007
     };
 
-    // Banner
-    var banner = {
-        app: '/*! For development only */\n',
-        build: '/*! Production script */\n'
-    };
-
     // Define the configuration for all the tasks
     grunt.initConfig({
 
@@ -45,7 +39,10 @@ module.exports = function (grunt) {
         package: grunt.file.readJSON('package.json'),
 
         // Banner
-        banner: banner,
+        banner: {
+            app: '/*! For development only <%= package.version %> <%= package.name %> <%= grunt.template.today("yyyymmdd") %>T<%= grunt.template.today("HHMM") %> */\n',
+            build: '/*! For production <%= package.version %> <%= package.name %> <%= grunt.template.today("yyyymmdd") %>T<%= grunt.template.today("HHMM") %> */\n'
+        },
 
         // Watches files for changes and runs tasks based on the changed files
         watch: {
