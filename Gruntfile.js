@@ -27,10 +27,7 @@ module.exports = function (grunt) {
     };
 
     // Banner
-    var banner = {
-        global: '/assets/includes/global/'
-        //emergency: '/emergency/assets/includes/'
-    };
+    var banner = '/*! Sample banner */\n';
 
     // Define the configuration for all the tasks
     grunt.initConfig({
@@ -43,6 +40,9 @@ module.exports = function (grunt) {
 
         // Package
         package: grunt.file.readJSON('package.json'),
+
+        // Banner
+        banner: banner,
 
         // Watches files for changes and runs tasks based on the changed files
         watch: {
@@ -58,7 +58,7 @@ module.exports = function (grunt) {
                     'assets.json',
                     '<%= config.app %>/assets/script/{,*/}*.js'
                 ],
-                tasks: ['jshint:app', 'concat:app', 'uglify:app' ],
+                tasks: ['jshint:app', 'uglify:app', 'concat:app' ],
                 options: {
                     livereload: true
                 }
@@ -240,13 +240,22 @@ module.exports = function (grunt) {
         },
 
         concat: {
-            options: {
-                banner: '<%= banner %>',
-                stripBanners: true
-            },
             app: {
+                options: {
+                    banner: '<%= banner %>',
+                    stripBanners: true
+                },
                 files: {
-                    '<%= config.temp %>/assets/script/app.beta.js': '<%= assets.js.emergencyNewsroomApp %>'
+                    '<%= config.dist %>/assets/emergency/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
+                }
+            },
+            build: {
+                options: {
+                    banner: '<%= banner %>',
+                    stripBanners: true
+                },
+                files: {
+                    '<%= config.dist %>/assets/emergency/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
                 }
             }
         },
@@ -265,7 +274,7 @@ module.exports = function (grunt) {
                     }
                 },
                 files: {
-                    '<%= config.dist %>/assets/emergency/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
+                    '<%= config.temp %>/assets/script/app.beta.js': '<%= assets.js.emergencyNewsroomApp %>'
                 }
             },
             build: {
@@ -278,7 +287,7 @@ module.exports = function (grunt) {
                     }
                 },
                 files: {
-                    '<%= config.dist %>/assets/emergency/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
+                    '<%= config.temp %>/assets/script/app.beta.js': '<%= assets.js.emergencyNewsroomApp %>'
                 }
             }
         },
@@ -365,8 +374,8 @@ module.exports = function (grunt) {
             'copy:build',
             'copy:src',
             'ssi:build',
-            'concat:app',
             'uglify:app',
+            'concat:app',
 //            'autoprefixer',
             'connect:livereload',
             'watch'
@@ -394,12 +403,12 @@ module.exports = function (grunt) {
     grunt.registerTask('build', [
         'clean:build',
         'copy:build',
-        'copy:src'
+        'copy:src',
+        'uglify:build',
+        'concat:build'
     ]);
 
     grunt.registerTask('default', [
-        'clean:build',
-        'copy:build',
-        'copy:src'
+        'build'
     ]);
 };

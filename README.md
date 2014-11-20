@@ -1,4 +1,8 @@
-emergency-services-app
+Emergency Services App
 ======================
 
-Single-page application for emergency services feed
+Single-page application for emergency services feed.
+
+# Development
+
+
