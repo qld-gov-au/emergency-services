@@ -15,9 +15,6 @@ module.exports = function (grunt) {
     // Load grunt tasks automatically
     require('load-grunt-tasks')(grunt);
 
-    // Connect include
-    var ssInclude = require('connect-include');
-
     // Configurable paths
     var config = {
         app: 'src',
@@ -114,7 +111,43 @@ module.exports = function (grunt) {
                 open: true,
                 livereload: 35729,
                 // Change this to '0.0.0.0' to access the server from outside
-                hostname: 'localhost'
+                hostname: 'localhost',
+                middleware: function(connect, options, middlewares) {
+                    // clean up our output
+                    options = options || {};
+                    options.index = options.index || 'index.html';
+                    middlewares.unshift(function globalIncludes( req, res, next ) {
+                        var fs = require('fs');
+                        var filename = require( 'url' ).parse( req.url ).pathname;
+
+                        if ( /\/$/.test( filename )) {
+                            filename += options.index;
+                        }
+
+                        if ( /\.html$/.test( filename )) {
+                            if ( /\.html$/.test( filename )) {
+                                fs.readFile( options.base + filename, 'utf-8', function( err, data ) {
+                                    if ( err ) {
+                                        next( err );
+                                    } else {
+                                        res.writeHead( 200, { 'Content-Type': 'text/html' });
+                                        data = data.split( 'title=<!--#echo encoding="url" var="title" -->' );
+                                        res.write( data.shift(), 'utf-8' );
+                                        data.forEach(function(chunk) {
+                                            res.write( chunk, 'utf-8' );
+                                        });
+                                        res.end();
+                                    }
+                                });
+                            }
+                        } else {
+                            next();
+                        }
+
+                    });
+
+                    return middlewares;
+                }
             },
             livereload: {
                 options: {
