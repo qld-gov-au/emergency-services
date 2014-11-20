@@ -103,9 +103,9 @@ module.exports = function (grunt) {
                 },
                 files: [{
                     expand: true,
-                    cwd: 'build/emergency',
+                    cwd: 'build/<%= config.directory %>',
                     src: ['*.html'],
-                    dest: 'build/emergency'
+                    dest: 'build/<%= config.directory %>'
                 }]
             }
         },
@@ -246,7 +246,7 @@ module.exports = function (grunt) {
                     stripBanners: true
                 },
                 files: {
-                    '<%= config.dist %>/assets/emergency/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
+                    '<%= config.dist %>/assets/<%= config.directory %>/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
                 }
             },
             build: {
@@ -346,7 +346,7 @@ module.exports = function (grunt) {
                     expand: true,
                     dot: true,
                     cwd: '<%= config.app %>',
-                    dest: '<%= config.dist %>/emergency',
+                    dest: '<%= config.dist %>/<%= config.directory %>',
                     src: [
                         '{,*/}{,*/}{,*/}*.html',
                         '!_bak/**'
