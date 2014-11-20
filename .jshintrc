@@ -17,6 +17,9 @@
     "globals": {
         "jQuery": true,
         "module": true,
-        "config": true
+        "config": true,
+        "document": true,
+        "window": true,
+        "DOMParser": true
     }
 }

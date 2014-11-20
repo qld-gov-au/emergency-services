@@ -1,4 +1,4 @@
-/* jshint unused:false, loopfunc:true */
+/* jshint unused:false, loopfunc:true, newcap:false */
 
 module.exports = function (grunt) {
     'use strict';
@@ -14,9 +14,6 @@ module.exports = function (grunt) {
 
     // Load grunt tasks automatically
     require('load-grunt-tasks')(grunt);
-
-    // Connect include
-    //var include = require('connect-include');
 
     // Configurable paths
     var config = {
@@ -73,7 +70,7 @@ module.exports = function (grunt) {
             },
             html: {
                 files: ['<%= config.app %>/{,*/}*.html'],
-                tasks: ['newer:copy:html']
+                tasks: ['newer:copy:html', 'newer:ssi:build']
             },
             livereload: {
                 options: {
@@ -88,6 +85,24 @@ module.exports = function (grunt) {
             }
         },
 
+        // https://www.npmjs.org/package/grunt-ssi
+        ssi: {
+            build: {
+                options: {
+                    cache: 'all',
+                    ext: '.html',
+                    baseDir: 'build',
+                    cacheDir: '.tmp/ssi'
+                },
+                files: [{
+                    expand: true,
+                    cwd: 'build/emergency',
+                    src: ['*.html'],
+                    dest: 'build/emergency'
+                }]
+            }
+        },
+
         // The actual grunt server settings
         connect: {
             options: {
@@ -96,52 +111,48 @@ module.exports = function (grunt) {
                 open: true,
                 livereload: 35729,
                 // Change this to '0.0.0.0' to access the server from outside
-                hostname: 'localhost'
+                hostname: 'localhost',
+                middleware: function(connect, options, middlewares) {
+                    // clean up our output
+                    options = options || {};
+                    options.index = options.index || 'index.html';
+                    middlewares.unshift(function globalIncludes( req, res, next ) {
+                        var fs = require('fs');
+                        var filename = require( 'url' ).parse( req.url ).pathname;
+
+                        if ( /\/$/.test( filename )) {
+                            filename += options.index;
+                        }
+
+                        if ( /\.html$/.test( filename )) {
+                            if ( /\.html$/.test( filename )) {
+                                fs.readFile( options.base + filename, 'utf-8', function( err, data ) {
+                                    if ( err ) {
+                                        next( err );
+                                    } else {
+                                        res.writeHead( 200, { 'Content-Type': 'text/html' });
+                                        data = data.split( 'title=<!--#echo encoding="url" var="title" -->' );
+                                        res.write( data.shift(), 'utf-8' );
+                                        data.forEach(function(chunk) {
+                                            res.write( chunk, 'utf-8' );
+                                        });
+                                        res.end();
+                                    }
+                                });
+                            }
+                        } else {
+                            next();
+                        }
+
+                    });
+
+                    return middlewares;
+                }
             },
             livereload: {
                 options: {
                     open: {
                         target: 'http://localhost:9000/<%= config.directory %>' // target url to open
-                    },
-                    middleware: function (connect, options, middlewares) {
-                        options = options || {};
-                        options.index = options.index || 'index.html';
-                        middlewares.unshift(function globalIncludes(req, res, next) {
-                            var fs = require('fs');
-                            var filename = require('url').parse(req.url).pathname;
-                            var split = function (data, include) {
-                                data = data.split('<!--#include virtual="' + include);
-                                return data;
-                            };
-
-                            if (/\/$/.test(filename)) {
-                                filename += options.index;
-                            }
-
-                            if (/\.html$/.test(filename)) {
-                                fs.readFile(options.base + filename, 'utf-8', function (err, data) {
-                                    if (err) {
-                                        next(err);
-                                    } else {
-                                        res.writeHead(200, { 'Content-Type': 'text/html' });
-                                        Object.keys(includes).forEach(function(element, key, _array) {
-                                            var include = includes[element];
-                                            var content = split(data, include);
-                                            res.write(content.shift(), 'utf-8');
-                                            content.forEach(function (chunk) {
-                                                res.write(fs.readFileSync(options.base + include + chunk.substring(0, chunk.indexOf('"-->')), 'utf-8'), 'utf-8');
-                                                res.write(chunk.substring(chunk.indexOf('-->') + 3), 'utf-8');
-                                            });
-                                        });
-                                        res.end();
-                                    }
-                                });
-
-                            } else {
-                                next();
-                            }
-                        });
-                        return middlewares;
                     }
                 }
             }
@@ -288,16 +299,17 @@ module.exports = function (grunt) {
                     }
                 ]
             },
-            app: {
+            src: {
                 files: [{
                     expand: true,
                     dot: true,
                     cwd: '<%= config.app %>',
-                    dest: '<%= config.dist %>/emergency',
+                    dest: '<%= config.dist %>/<%= config.directory %>',
                     src: [
                         '{,*/}*.html',
                         'assets/images/**/*.*',
-                        'assets/includes/**/*.*'
+                        'assets/includes/**/*.*',
+                        '!_bak/**'
                     ]
                 }]
             },
@@ -308,7 +320,8 @@ module.exports = function (grunt) {
                     cwd: '<%= config.app %>',
                     dest: '<%= config.dist %>/emergency',
                     src: [
-                        '{,*/}*.html'
+                        '{,*/}*.html',
+                        '!_bak/**'
                     ]
                 }]
             }
@@ -327,7 +340,8 @@ module.exports = function (grunt) {
         grunt.task.run([
             'clean:build',
             'copy:build',
-            'copy:app',
+            'copy:src',
+            'ssi:build',
 //            'autoprefixer',
             'connect:livereload',
             'watch'
@@ -342,7 +356,7 @@ module.exports = function (grunt) {
     grunt.registerTask('test', function (target) {
         if (target !== 'watch') {
             grunt.task.run([
-                'clean:server',
+                'clean:build'
             ]);
         }
 
@@ -354,11 +368,13 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:build',
-        'copy:build'
+        'copy:build',
+        'copy:src'
     ]);
 
     grunt.registerTask('default', [
         'clean:build',
-        'copy:build'
+        'copy:build',
+        'copy:src'
     ]);
 };
