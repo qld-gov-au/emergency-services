@@ -27,7 +27,10 @@ module.exports = function (grunt) {
     };
 
     // Banner
-    var banner = '/*! Sample banner */\n';
+    var banner = {
+        app: '/*! For development only */\n',
+        build: '/*! Production script */\n'
+    };
 
     // Define the configuration for all the tasks
     grunt.initConfig({
@@ -207,7 +210,7 @@ module.exports = function (grunt) {
             options: {
                 loadPath: 'bower_components'
             },
-            dist: {
+            app: {
                 files: [{
                     expand: true,
                     cwd: '<%= config.app %>/styles',
@@ -216,7 +219,7 @@ module.exports = function (grunt) {
                     ext: '.css'
                 }]
             },
-            server: {
+            build: {
                 files: [{
                     expand: true,
                     cwd: '<%= config.app %>/styles',
@@ -229,7 +232,7 @@ module.exports = function (grunt) {
 
         // The following *-min tasks produce minified files in the dist folder
         imagemin: {
-            dist: {
+            build: {
                 files: [{
                     expand: true,
                     cwd: '<%= config.app %>/images',
@@ -242,7 +245,7 @@ module.exports = function (grunt) {
         concat: {
             app: {
                 options: {
-                    banner: '<%= banner %>',
+                    banner: '<%= banner.app %>',
                     stripBanners: true
                 },
                 files: {
@@ -251,12 +254,10 @@ module.exports = function (grunt) {
             },
             build: {
                 options: {
-                    banner: '<%= banner %>',
+                    banner: '<%= banner.build %>',
                     stripBanners: true
                 },
-                files: {
-                    '<%= config.dist %>/assets/emergency/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
-                }
+                files: '<%= concat.app.files %>'
             }
         },
 
@@ -286,9 +287,7 @@ module.exports = function (grunt) {
                         dead_code: true
                     }
                 },
-                files: {
-                    '<%= config.temp %>/assets/script/app.beta.js': '<%= assets.js.emergencyNewsroomApp %>'
-                }
+                files: '<%= uglify.app.files %>'
             }
         },
 
@@ -331,7 +330,7 @@ module.exports = function (grunt) {
                     }
                 ]
             },
-            src: {
+            app: {
                 files: [{
                     expand: true,
                     dot: true,
@@ -372,7 +371,7 @@ module.exports = function (grunt) {
         grunt.task.run([
             'clean:build',
             'copy:build',
-            'copy:src',
+            'copy:app',
             'ssi:build',
             'uglify:app',
             'concat:app',
@@ -403,7 +402,7 @@ module.exports = function (grunt) {
     grunt.registerTask('build', [
         'clean:build',
         'copy:build',
-        'copy:src',
+        'copy:app',
         'uglify:build',
         'concat:build'
     ]);
