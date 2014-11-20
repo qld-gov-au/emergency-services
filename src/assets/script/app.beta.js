@@ -64,7 +64,7 @@ if (!String.prototype.contains) {
             var load = (isIE) ? 'jsonp' : 'xml';
             // set state
             this.setState({
-                method: load
+                method: 'jsonp' //load
             });
             // get priority feed
             this.getPriorityFeed();
@@ -278,9 +278,8 @@ if (!String.prototype.contains) {
                         $.each(list, function (index, item) {
                             if (count <= component.props.limit[key]) {
                                 item.description = $.unescapifyHTML(item.description);
-                                // get image
                                 // item.image = images[ item.category ] || images[ 'default' ]; // get image
-                                item.link = (item.link.contains('http:')) && item.link.replace(/http:/g, 'https:');
+                                item.link = (item.link.contains('http:')) ? item.link.replace(/http:/g, 'https:') : item.link;
                                 item.id = count;
                                 result.push(item);
                                 count++;
@@ -289,10 +288,8 @@ if (!String.prototype.contains) {
                     } else {
                         var item = list[0];
                         item.description = $.unescapifyHTML(item.description);
-                        // get image
-                        // item.image = component.getImageCategory( value.category );
-                        item.image = images[ item.category ] || images[ 'default' ];
-                        item.link = (item.link.contains('http:')) && item.link.replace(/http:/g, 'https:');
+                        // item.image = images[ item.category ] || images[ 'default' ]; // get image
+                        item.link = (item.link.contains('http:')) ? item.link.replace(/http:/g, 'https:') : item.link;
                         item.id = count;
                         result.push(item);
                         count++;

@@ -69,8 +69,8 @@ module.exports = function (grunt) {
                 tasks: ['newer:copy:styles']
             },
             html: {
-                files: ['<%= config.app %>/{,*/}*.html'],
-                tasks: ['newer:copy:html', 'newer:ssi:build']
+                files: ['<%= config.app %>/{,*/}{,*/}{,*/}*.html'],
+                tasks: ['newer:copy:html', 'ssi:build']
             },
             livereload: {
                 options: {
@@ -242,18 +242,31 @@ module.exports = function (grunt) {
         },
 
         uglify: {
-            options: {
-                beautify: true,
-                mangle: true,
-                preserveComments: false,
-                compress: {
-                    global_defs: {
-                        TEST: false
-                    },
-                    dead_code: true
+            app: {
+                options: {
+                    beautify: true,
+                    mangle: true,
+                    preserveComments: false,
+                    compress: {
+                        global_defs: {
+                            TEST: false
+                        },
+                        dead_code: true
+                    }
+                },
+                files: {
+                    '<%= config.dist %>/assets/emergency/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
                 }
             },
-            app: {
+            build: {
+                options: {
+                    compress: {
+                        global_defs: {
+                            TEST: false
+                        },
+                        dead_code: true
+                    }
+                },
                 files: {
                     '<%= config.dist %>/assets/emergency/newsroom/app.beta.js': '<%= config.temp %>/assets/script/app.beta.js'
                 }
@@ -320,7 +333,7 @@ module.exports = function (grunt) {
                     cwd: '<%= config.app %>',
                     dest: '<%= config.dist %>/emergency',
                     src: [
-                        '{,*/}*.html',
+                        '{,*/}{,*/}{,*/}*.html',
                         '!_bak/**'
                     ]
                 }]
