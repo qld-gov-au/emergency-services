@@ -36,27 +36,20 @@ module.exports = function (grunt) {
         assets: grunt.file.readJSON('assets.json'),
 
         // Package
-        package: grunt.file.readJSON('package.json'),
+        pkg: grunt.file.readJSON('package.json'),
 
         // Banner
         banner: {
             app: '/**\n' +
                 ' * ! For development only\n' +
-                ' * <%= package.name %>.js - Version <%= package.version %>\n' +
-                ' * <%= package.description %>\n' +
-                ' * Author: <%= package.author %>\n' +
+                ' * <%= pkg.name %>.js - Version <%= pkg.version %>\n' +
+                ' * <%= pkg.description %>\n' +
+                ' * Author: <%= pkg.author %>\n' +
                 ' * Build date: <%= grunt.template.today("yyyy-mm-dd HH:MM:ss") %>\n' +
-                ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>\n' +
-                ' * Released under the <%= package.license %> license\n' +
+                ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.company %>\n' +
+                ' * Released under the <%= pkg.license %> license\n' +
                 ' */\n',
-            build: '/*! For production\n' +
-                ' * <%= package.name %>.js - Version <%= package.version %>\n' +
-                ' * <%= package.description %>\n' +
-                ' * Author: <%= package.author %>\n' +
-                ' * Build date: <%= grunt.template.today("yyyy-mm-dd HH:MM:ss") %>\n' +
-                ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= package.author.company %>\n' +
-                ' * Released under the <%= package.license %> license\n' +
-                ' */\n'
+            build: '/*! For production - <%= pkg.name %>.js - Version <%= pkg.version %> <%= grunt.template.today("yyyymmdd") %>T<%= grunt.template.today("HHMM") %> */\n',
         },
 
         // Watches files for changes and runs tasks based on the changed files
@@ -260,7 +253,7 @@ module.exports = function (grunt) {
                     stripBanners: true
                 },
                 files: {
-                    '<%= config.dist %>/assets/script/apps/<%= package.name %>.js': '<%= config.temp %>/assets/script/<%= package.name %>.js'
+                    '<%= config.dist %>/assets/script/apps/<%= pkg.name %>.js': '<%= config.temp %>/assets/script/<%= pkg.name %>.js'
                 }
             },
             build: {
@@ -286,7 +279,7 @@ module.exports = function (grunt) {
                     }
                 },
                 files: {
-                    '<%= config.temp %>/assets/script/<%= package.name %>.js': '<%= assets.js.emergencyNewsroomApp %>'
+                    '<%= config.temp %>/assets/script/<%= pkg.name %>.js': '<%= assets.js.emergencyNewsroomApp %>'
                 }
             },
             build: {
