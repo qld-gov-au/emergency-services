@@ -9,7 +9,7 @@
     <!--#set var="licence" value="http://creativecommons.org/licenses/by-nd/2.5/au/"-->
     <!--#include virtual="/assets/includes/global/head-assets.html"-->
     <!--#include virtual="/assets/includes/global/head-assets-home.html"-->
-
+    <link rel="stylesheet" href="/emergency/assets/style/featured.css"/>
     <link rel="schema.DCTERMS" href="http://purl.org/dc/terms/"/>
     <link rel="schema.AGLSTERMS" href="http://www.agls.gov.au/agls/terms/"/>
 
@@ -182,7 +182,7 @@
                                     <div class="section-header">
                                         <h2>Emergency news</h2>
                                     </div>
-                                    <div class="slide-runner"></div>
+                                    <div class="emergency-feed"></div>
                                 </div>
                             </div>
 
@@ -223,7 +223,16 @@
 <!-- end #page-container, .max-width -->
 
 <!--#include virtual="/assets/includes/global/footer-page.html"-->
+<!--#include virtual="/emergency/assets/includes/templates/featured.html"-->
+<!--#include virtual="/emergency/assets/includes/templates/loading.html"-->
+<!--#include virtual="/emergency/assets/includes/templates/error.html"-->
 <script type="text/javascript" src="/assets/v2/script/apps/emergency-services.js"></script>
+<script type="text/javascript">
+    $().ready( function() {
+        'use strict';
+        qg.swe.emergency.init();
+    });
+</script>
 <!--#include virtual="/assets/includes/global/footer-stats.html"-->
 </body>
 </html>

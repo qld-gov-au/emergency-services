@@ -88,11 +88,11 @@ module.exports = function (grunt) {
             },
             styles: {
                 files: ['<%= config.app %>/assets/style/{,*/}*.css'],
-                tasks: ['newer:copy:styles']
+                tasks: ['newer:copy:styles', 'autoprefixer']
             },
             html: {
                 files: ['<%= config.app %>/{,*/}{,*/}{,*/}*.html'],
-                tasks: ['newer:copy:html', 'ssi:build']
+                tasks: ['copy:html', 'ssi:build']
             },
             livereload: {
                 options: {
@@ -100,9 +100,8 @@ module.exports = function (grunt) {
                 },
                 files: [
                     '<%= config.dist %>/{,*/}*.html',
-                    '<%= config.dist %>/assets/images/{,*/}*',
-                    '<%= config.dist %>/assets/includes/{,*/}*',
-                    '<%= config.dist %>/assets/<%= config.directory %>/newsroom/{,*/}*'
+                    '<%= config.dist %>/<%= config.directory %>/assets/{,*/}{,*/}*',
+                    '<%= config.dist %>/assets/v2/script/apps/*'
                 ]
             }
         },
@@ -367,6 +366,37 @@ module.exports = function (grunt) {
                         '!_bak/**'
                     ]
                 }]
+            },
+            styles: {
+                files: [
+                    {
+                        expand: true,
+                        dot: true,
+                        cwd: '<%= config.app %>',
+                        dest: '<%= config.dist %>/<%= config.directory %>',
+                        src: [
+                            '{,*/}{,*/}{,*/}*.css',
+                            '!_bak/**'
+                        ]
+                    }
+                ]
+            }
+        },
+
+        // Add vendor prefixed styles
+        autoprefixer: {
+            options: {
+                browsers: ['> 1%', 'last 2 versions', 'Firefox ESR', 'Opera 12.1']
+            },
+            build: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= config.dist %>/<%= config.directory %>/assets/styles/',
+                        src: '{,*/}*.css',
+                        dest: '<%= config.dist %>/<%= config.directory %>/assets/styles/'
+                    }
+                ]
             }
         }
     });
@@ -387,7 +417,8 @@ module.exports = function (grunt) {
             'ssi:build',
             'uglify:app',
             'concat:app',
-//            'autoprefixer',
+            'copy:styles',
+            'autoprefixer',
             'connect:livereload',
             'watch'
         ]);
@@ -417,7 +448,9 @@ module.exports = function (grunt) {
         'copy:app',
         'ssi:build',
         'uglify:app',
-        'concat:app'
+        'concat:app',
+        'copy:styles',
+        'autoprefixer'
     ]);
 
     grunt.registerTask('build', [
@@ -425,7 +458,9 @@ module.exports = function (grunt) {
         'copy:build',
         'copy:app',
         'uglify:build',
-        'concat:build'
+        'concat:build',
+        'copy:styles',
+        'autoprefixer'
     ]);
 
     grunt.registerTask('default', [

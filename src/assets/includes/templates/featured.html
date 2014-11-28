@@ -1,0 +1,21 @@
+<script id="list-template" type="text/x-handlebars-template">
+    {{#each items}}
+    <div id="featured-{{@index}}" class="section" title="{{title}}">
+        {{#if image}}
+        <a href="{{link}}">
+            <span class="feature">
+                <img height="189" width="373" alt="{{title}}" src="{{image.src}}"/>
+            </span>
+        </a>
+        {{/if}}
+        <h3>
+            <a href="{{link}}">{{title}}</a>
+        </h3>
+        <div class="feature-content">
+            <p class="time"><strong>{{formattedDate}}</strong></p>
+            <p>{{description}}</p>
+            <p class="more"><a href="{{link}}">More&hellip;</a></p>
+        </div>
+    </div>
+    {{/each}}
+</script>

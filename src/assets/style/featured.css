@@ -1,0 +1,13 @@
+/* emergency services featured news */
+
+.hide {
+    display: none;
+}
+
+.emergency-state #asides {
+    margin-top: 0;
+}
+
+#asides {
+    margin-bottom: 2em;
+}
