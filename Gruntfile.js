@@ -101,7 +101,7 @@ module.exports = function (grunt) {
                 files: [
                     '<%= config.dist %>/{,*/}*.html',
                     '<%= config.dist %>/<%= config.directory %>/assets/{,*/}{,*/}*',
-                    '<%= config.dist %>/assets/v2/script/apps/*'
+                    '<%= config.dist %>/assets/script/apps/*'
                 ]
             }
         },
@@ -260,7 +260,7 @@ module.exports = function (grunt) {
                     stripBanners: true
                 },
                 files: {
-                    '<%= config.dist %>/<%= config.assets %>/script/apps/<%= package.name %>.js': '<%= config.temp %>/assets/script/<%= package.name %>.js'
+                    '<%= config.dist %>/assets/script/apps/<%= package.name %>.js': '<%= config.temp %>/assets/script/<%= package.name %>.js'
                 }
             },
             build: {
