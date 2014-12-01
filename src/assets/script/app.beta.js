@@ -134,9 +134,14 @@ qg.swe.emergency = (function ($, swe, Date, Mocks) {
                 }
             },
             date: function (pubDate) {
-                var parse = pubDate.replace(/(AM|PM)/, ' $1').replace('  ', ' ') + ' +10';
-                var date = new Date(parse);
-                console.log(date.toString().split(' '));
+//                var parse = pubDate.replace(/(AM|PM)/, ' $1').replace('  ', ' ') + ' +10';
+//                var date = new Date(parse);
+//                console.log(date.toString().split(' '));
+//                return {
+//                    timestamp: date.getTime(),
+//                    formattedDate: date.toString('d MMMM yyyy, h.mm') + ((date.toString('HH') >= 12) ? 'pm' : 'am')
+//                };
+                var date = Date.parse(pubDate);
                 return {
                     timestamp: date.getTime(),
                     formattedDate: date.toString('d MMMM yyyy, h.mm') + ((date.toString('HH') >= 12) ? 'pm' : 'am')
