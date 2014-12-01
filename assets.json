@@ -6,11 +6,11 @@
             "bower_components/html5-boilerplate/js/plugins.js",
             "bower_components/escapify/lib/jquery.escapify.js",
             "bower_components/json3/lib/json3.js",
-            "bower_components/datejs/build/date.js",
             "bower_components/routie/lib/routie.js",
             "bower_components/handlebars/handlebars.js",
             "src/assets/script/xml2json.js",
             "src/assets/script/mocks.js",
+            "src/assets/script/date.js",
             "src/assets/script/app.beta.js"
         ]
     }

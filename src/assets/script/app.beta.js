@@ -134,7 +134,9 @@ qg.swe.emergency = (function ($, swe, Date, Mocks) {
                 }
             },
             date: function (pubDate) {
-                var date = Date.parse(pubDate);
+                var parse = pubDate.replace(/(AM|PM)/, ' $1').replace('  ', ' ') + ' +10';
+                var date = new Date(parse);
+                console.log(date.toString().split(' '));
                 return {
                     timestamp: date.getTime(),
                     formattedDate: date.toString('d MMMM yyyy, h.mm') + ((date.toString('HH') >= 12) ? 'pm' : 'am')
