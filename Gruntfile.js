@@ -335,32 +335,6 @@ module.exports = function (grunt) {
                 ]
             },
             app: {
-                files: [{
-                    expand: true,
-                    dot: true,
-                    cwd: '<%= config.app %>',
-                    dest: '<%= config.dist %>/<%= config.directory %>',
-                    src: [
-                        '{,*/}*.html',
-                        'assets/images/**/*.*',
-                        'assets/includes/**/*.*',
-                        '!_bak/**'
-                    ]
-                }]
-            },
-            html: {
-                files: [{
-                    expand: true,
-                    dot: true,
-                    cwd: '<%= config.app %>',
-                    dest: '<%= config.dist %>/<%= config.directory %>',
-                    src: [
-                        '{,*/}{,*/}{,*/}*.html',
-                        '!_bak/**'
-                    ]
-                }]
-            },
-            styles: {
                 files: [
                     {
                         expand: true,
@@ -368,7 +342,58 @@ module.exports = function (grunt) {
                         cwd: '<%= config.app %>',
                         dest: '<%= config.dist %>/<%= config.directory %>',
                         src: [
-                            '{,*/}{,*/}{,*/}*.css',
+                            '{,*/}*.html',
+                            'assets/images/**/*.*',
+                            '!assets/includes/**/*.*',
+                            '!_bak/**'
+                        ]
+                    },
+                    {
+                        expand: true,
+                        dot: true,
+                        cwd: '<%= config.app %>/assets',
+                        dest: '<%= config.dist %>/assets/<%= config.directory %>',
+                        src: [
+                            'includes/{,*/}*.html',
+                            'style/{,*/}*.css',
+                            '!_bak/**'
+                        ]
+                    }
+                ]
+            },
+            html: {
+                files: [
+                    {
+                        expand: true,
+                        dot: true,
+                        cwd: '<%= config.app %>',
+                        dest: '<%= config.dist %>/<%= config.directory %>',
+                        src: [
+                            '*.html',
+                            '!_bak/**'
+                        ]
+                    },
+                    {
+                        expand: true,
+                        dot: true,
+                        cwd: '<%= config.app %>/assets',
+                        dest: '<%= config.dist %>/assets/<%= config.directory %>',
+                        src: [
+                            'includes/{,*/}*.html',
+                            '!_bak/**'
+                        ]
+                    }
+                ]
+            },
+            styles: {
+                files: [
+                    {
+                        expand: true,
+                        dot: true,
+                        cwd: '<%= config.app %>/assets',
+                        dest: '<%= config.dist %>/assets/<%= config.directory %>',
+                        src: [
+                            'style/{,*/}*.css',
                             '!_bak/**'
                         ]
                     }
