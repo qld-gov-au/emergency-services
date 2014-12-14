@@ -49,7 +49,7 @@ module.exports = function (grunt) {
                 ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.company %>\n' +
                 ' * Released under the <%= pkg.license %> license\n' +
                 ' */\n',
-            build: '/*! For production - <%= pkg.name %>.js - Version <%= pkg.version %> <%= grunt.template.today("yyyymmdd") %>T<%= grunt.template.today("HHMM") %> */\n',
+            build: '/*! For production - <%= pkg.name %>.js - Version <%= pkg.version %> <%= grunt.template.today("yyyymmdd") %>T<%= grunt.template.today("HHMM") %> */\n'
         },
 
         // Watches files for changes and runs tasks based on the changed files
@@ -195,7 +195,10 @@ module.exports = function (grunt) {
                 src: 'Gruntfile.js'
             },
             app: {
-                src: '<%= config.app %>/assets/script/{,*/}*.js'
+                src: [
+                    '<%= config.app %>/assets/script/{,*/}*.js',
+                    '!<%= config.app %>/assets/script/{,*/}date.js'
+                ]
             }
         },
 

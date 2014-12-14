@@ -12,7 +12,9 @@
             <a href="{{link}}">{{title}}</a>
         </h3>
         <div class="feature-content">
+            {{#if formattedDate}}
             <p class="time"><strong>{{formattedDate}}</strong></p>
+            {{/if}}
             <p>{{description}}</p>
             <p class="more"><a href="{{link}}">More&hellip;</a></p>
         </div>

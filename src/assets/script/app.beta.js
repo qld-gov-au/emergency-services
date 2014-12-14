@@ -8,12 +8,19 @@ if (!String.prototype.contains) {
     };
 }
 
-if (!Object.keys) Object.keys = function(o) {
-    if (o !== Object(o))
-        throw new TypeError('Object.keys called on a non-object');
-    var k=[],p;
-    for (p in o) if (Object.prototype.hasOwnProperty.call(o,p)) k.push(p);
-    return k;
+if (!Object.keys) {
+    Object.keys = function(o) {
+        if (o !== Object(o)) {
+            throw new TypeError('Object.keys called on a non-object');
+        }
+        var k=[],p;
+        for (p in o) {
+            if (Object.prototype.hasOwnProperty.call(o,p)) {
+                k.push(p);
+            }
+        }
+        return k;
+    };
 }
 
 qg.swe.emergency = (function ($, swe, Date, Mocks) {
@@ -142,13 +149,6 @@ qg.swe.emergency = (function ($, swe, Date, Mocks) {
                 }
             },
             date: function (pubDate) {
-//                var parse = pubDate.replace(/(AM|PM)/, ' $1').replace('  ', ' ') + ' +10';
-//                var date = new Date(parse);
-//                console.log(date.toString().split(' '));
-//                return {
-//                    timestamp: date.getTime(),
-//                    formattedDate: date.toString('d MMMM yyyy, h.mm') + ((date.toString('HH') >= 12) ? 'pm' : 'am')
-//                };
                 var date = Date.parse(pubDate);
                 return {
                     timestamp: date.getTime(),
@@ -220,7 +220,8 @@ qg.swe.emergency = (function ($, swe, Date, Mocks) {
                             link: (item.link.contains('http:')) ? item.link.replace(/http:/g, 'https:') : item.link,
                             image: null //images[ item.category ] || images[ 'default' ] // get image
                         };
-                        $.extend(object[index], date);
+                        // TODO: add date in again by uncommenting line below
+                        //$.extend(object[index], date);
                     }
                 });
                 var array = $.map(object, function(value) {
