@@ -23,6 +23,7 @@ module.exports = function (grunt) {
         assets: 'assets/v2',
         swe: '../swe_template/build/_htdocs/assets',
         directory: 'emergency',
+        localhost: 'localhost', //'192.168.56.1',
         interval: 5007
     };
 
@@ -92,9 +93,9 @@ module.exports = function (grunt) {
                     livereload: '<%= connect.options.livereload %>'
                 },
                 files: [
-                    '<%= config.dist %>/{,*/}*.html',
-                    '<%= config.dist %>/<%= config.directory %>/assets/{,*/}{,*/}*',
-                    '<%= config.dist %>/assets/script/apps/*'
+//                    '<%= config.dist %>/{,*/}*.html',
+//                    '<%= config.dist %>/<%= config.directory %>/assets/{,*/}{,*/}*',
+//                    '<%= config.dist %>/assets/script/apps/*'
                 ]
             }
         },
@@ -419,9 +420,85 @@ module.exports = function (grunt) {
                     }
                 ]
             }
+        },
+
+        // Shell tasks
+        shell: {
+            options: {
+                stdout: true
+            },
+            update: {
+                command: 'node ./node_modules/protractor/bin/webdriver-manager update'
+            },
+            update_ie: {
+                command: './node_modules/.bin/webdriver-manager update --ie'
+            },
+            webdriver: {
+                command: './node_modules/.bin/webdriver-manager start'
+            },
+            protractor: {
+                command: './node_modules/.bin/protractor ./test/spec/protractor.conf.js'
+            },
+            browserstack: {
+                command: './node_modules/browserstacklocal/win.exe r9cBSaXLmXf331LQsYAd <%= config.localhost %>,9000,0'
+            },
+            command: {
+                command: './cmd/setup.cmd'
+            },
+            terminal: {
+                command: './cmd/setup.scpt'
+            }
+        },
+
+        // Build multi-tasks
+        build: {
+            dev: {
+                tasks: [
+                    'clean:build',
+                    'copy:build',
+                    'copy:app',
+                    'ssi:build',
+                    'jshint:app',
+                    'uglify:app',
+                    'concat:app',
+                    'copy:styles',
+                    'autoprefixer'
+                ]
+            },
+            stage: {
+                tasks: [
+                    'clean:build',
+                    'copy:build',
+                    'copy:app',
+                    'jshint:app',
+                    'uglify:app',
+                    'concat:app',
+                    'copy:styles',
+                    'autoprefixer'
+                ]
+            },
+            dist: {
+                tasks: [
+                    'clean:build',
+                    'copy:build',
+                    'copy:app',
+                    'uglify:build',
+                    'concat:build',
+                    'copy:styles',
+                    'autoprefixer'
+                ]
+            }
         }
     });
 
+    // Register multi-tasks
+    grunt.registerMultiTask('build', 'Build tasks', function () {
+        grunt.task.run(this.data.tasks);
+    });
+
+    grunt.registerMultiTask('testing', 'Testing tasks', function() {
+        grunt.task.run( this.data.tasks );
+    });
 
     grunt.registerTask('serve', 'start the server and preview your app, --allow-remote for remote access', function (target) {
         if (grunt.option('allow-remote')) {
@@ -432,14 +509,7 @@ module.exports = function (grunt) {
         }
 
         grunt.task.run([
-            'clean:build',
-            'copy:build',
-            'copy:app',
-            'ssi:build',
-            'uglify:app',
-            'concat:app',
-            'copy:styles',
-            'autoprefixer',
+            'build:dev',
             'connect:livereload',
             'watch'
         ]);
@@ -450,41 +520,12 @@ module.exports = function (grunt) {
         grunt.task.run([target ? ('serve:' + target) : 'serve']);
     });
 
-    grunt.registerTask('test', function (target) {
-        if (target !== 'watch') {
-            grunt.task.run([
-                'clean:build'
-            ]);
-        }
-
-        grunt.task.run([
-            'connect:test',
-            'mocha'
-        ]);
-    });
-
-    grunt.registerTask('dev', [
-        'clean:build',
-        'copy:build',
-        'copy:app',
-        'ssi:build',
-        'uglify:app',
-        'concat:app',
-        'copy:styles',
-        'autoprefixer'
-    ]);
-
-    grunt.registerTask('build', [
-        'clean:build',
-        'copy:build',
-        'copy:app',
-        'uglify:build',
-        'concat:build',
-        'copy:styles',
-        'autoprefixer'
+    grunt.registerTask('webdriver', [
+        'shell:update',
+        'shell:update_ie'
     ]);
 
     grunt.registerTask('default', [
-        'build'
+        'build:dist'
     ]);
 };
