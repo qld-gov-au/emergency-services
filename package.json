@@ -29,7 +29,6 @@
     "grunt-contrib-uglify": "^0.6.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-newer": "^0.8.0",
-    "grunt-shell-spawn": "^0.3.0",
     "grunt-ssi": "^0.2.1",
     "jshint-stylish": "^1.0.0",
     "jshint-stylish-ex": "^0.2.0",
@@ -37,5 +36,10 @@
     "load-grunt-tasks": "^1.0.0",
     "time-grunt": "^1.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "browserstacklocal": "0.0.4",
+    "grunt-protractor-runner": "^1.1.4",
+    "grunt-shell-spawn": "^0.3.0",
+    "protractor": "^1.5.0"
+  }
 }
