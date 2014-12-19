@@ -450,6 +450,70 @@ module.exports = function (grunt) {
             }
         },
 
+        // Protractor tasks
+        protractor: {
+            options: {
+                configFile: './test/spec/protractor.conf.js', //your protractor config file
+                keepAlive: true, // If false, the grunt process stops when the test fails.
+                noColor: false, // If true, protractor will not use colors in its output.
+                args: {
+                    // Arguments passed to the command
+                }
+            },
+            chrome: {
+                options: {
+                    configFile: './test/spec/protractor.conf.chrome.js'
+                }
+            },
+            firefox: {
+                options: {
+                    configFile: './test/spec/protractor.conf.firefox.js'
+                }
+            },
+            safari: {
+                options: {
+                    configFile: './test/spec/protractor.conf.safari.js'
+                }
+            },
+            ie: {
+                options: {
+                    configFile: './test/spec/protractor.conf.ie.js'
+                }
+            },
+            browserstack: {
+                options: {
+                    configFile: './test/spec/protractor.conf.browserstack.js'
+                }
+            }
+        },
+
+        // Testing tasks
+        testing: {
+            // e2e windows (desktop)
+            win: {
+                tasks: [
+                    'protractor:chrome',
+                    'protractor:firefox',
+                    'protractor:ie'
+                ]
+            },
+            // e2e macintosh (desktop)
+            mac: {
+                tasks: [
+                    'protractor:chrome',
+                    'protractor:firefox',
+                    'protractor:safari'
+                ]
+            },
+            // e2e browserstack
+            browserstack: {
+                tasks: [
+                    //'shell:browserstack',
+                    'protractor:browserstack'
+                ]
+            }
+        },
+
         // Build multi-tasks
         build: {
             dev: {
