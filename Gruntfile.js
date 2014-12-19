@@ -93,9 +93,9 @@ module.exports = function (grunt) {
                     livereload: '<%= connect.options.livereload %>'
                 },
                 files: [
-//                    '<%= config.dist %>/{,*/}*.html',
-//                    '<%= config.dist %>/<%= config.directory %>/assets/{,*/}{,*/}*',
-//                    '<%= config.dist %>/assets/script/apps/*'
+                    '<%= config.dist %>/<%= config.directory %>/{,*/}{,*/}{,*/}*.html',
+                    '<%= config.dist %>/assets/<%= config.directory %>/{,*/}{,*/}{,*/}*.*',
+                    '<%= config.dist %>/assets/script/{,*/}{,*/}{,*/}*.js'
                 ]
             }
         },
