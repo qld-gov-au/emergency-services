@@ -128,6 +128,10 @@ module.exports = function (grunt) {
                 // Change this to '0.0.0.0' to access the server from outside
                 hostname: 'localhost',
                 middleware: function(connect, options, middlewares) {
+                    var strSplit = function(str, match) {
+                        var split = str.split(match);
+                        return split.join('');
+                    };
                     // clean up our output
                     options = options || {};
                     options.index = options.index || 'index.html';
@@ -146,11 +150,17 @@ module.exports = function (grunt) {
                                         next( err );
                                     } else {
                                         res.writeHead( 200, { 'Content-Type': 'text/html' });
+                                        data = strSplit( data, 'title=<!--#echo encoding="url" var="title" -->' );
+                                        data = strSplit( data, '<!--#echo encoding="entity" var="' );
+                                        data = strSplit( data, ' -->"' );
+                                        res.write( data, 'utf-8' );
+                                        /*
                                         data = data.split( 'title=<!--#echo encoding="url" var="title" -->' );
                                         res.write( data.shift(), 'utf-8' );
                                         data.forEach(function(chunk) {
                                             res.write( chunk, 'utf-8' );
                                         });
+                                        */
                                         res.end();
                                     }
                                 });
