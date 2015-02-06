@@ -2,6 +2,7 @@
 
 [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 [![Dependency Status](https://david-dm.org/qld-gov-au/emergency-services.png)](https://david-dm.org/qld-gov-au/emergency-services)
+[![devDependency Status](https://david-dm.org/qld-gov-au/emergency-services/dev-status.svg)](https://david-dm.org/qld-gov-au/emergency-services#info=devDependencies)
 
 Single-page application for emergency services feed. This page is used on [Emergency services and safety](http://www.qld.gov.au/emergency/) pages.
 
