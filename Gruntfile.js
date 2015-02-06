@@ -438,25 +438,25 @@ module.exports = function (grunt) {
                 stdout: true
             },
             update: {
-                command: 'node ./node_modules/protractor/bin/webdriver-manager update'
+                command: 'npm run update'
             },
             update_ie: {
-                command: './node_modules/.bin/webdriver-manager update --ie'
+                command: 'npm run update_ie'
             },
             webdriver: {
-                command: './node_modules/.bin/webdriver-manager start'
+                command: 'npm run webdriver'
             },
             protractor: {
-                command: './node_modules/.bin/protractor ./test/spec/protractor.conf.js'
+                command: 'node_modules/.bin/protractor test/spec/protractor.conf.js'
             },
             browserstack: {
-                command: './node_modules/browserstacklocal/win.exe r9cBSaXLmXf331LQsYAd <%= config.localhost %>,9000,0'
+                command: 'node_modules/browserstacklocal/win.exe r9cBSaXLmXf331LQsYAd <%= config.localhost %>,9000,0'
             },
             command: {
-                command: './cmd/setup.cmd'
+                command: 'cmd/setup.cmd'
             },
             terminal: {
-                command: './cmd/setup.scpt'
+                command: 'cmd/setup.scpt'
             }
         },
 

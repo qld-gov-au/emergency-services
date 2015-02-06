@@ -4,7 +4,10 @@
   "description": "Single-page application for emergency services feed",
   "main": "Gruntfile.js",
   "scripts": {
-    "postinstall": "bower install"
+    "postinstall": "bower install",
+    "update": "node ./node_modules/protractor/bin/webdriver-manager update",
+    "update_ie": "./node_modules/.bin/webdriver-manager update --ie",
+    "webdriver": "./node_modules/.bin/webdriver-manager start"
   },
   "repository": {
     "type": "git",
@@ -38,8 +41,8 @@
   },
   "devDependencies": {
     "browserstacklocal": "0.0.4",
-    "grunt-protractor-runner": "^1.1.4",
-    "grunt-shell-spawn": "^0.3.0",
-    "protractor": "^1.5.0"
+    "grunt-protractor-runner": "^1.2.1",
+    "grunt-shell": "^1.1.1",
+    "protractor": "^1.6.1"
   }
 }
