@@ -206,28 +206,30 @@ qg.swe.emergency = (function ($, swe, Date, Mocks) {
                 return JSON.parse(replace);
             },
             parse: function(clean, images) {
-                // create a single object
-                var object = {};
-                // run some formatting
-                $.each($.extend({}, clean.priority, clean.standard), function (key, item) {
-                    // set timestamp, etc
-                    var date = app.set.date(item.pubDate);
-                    var index = date.timestamp;
-                    if (!object.hasOwnProperty(index)) {
-                        object[index] = {
-                            title: item.title,
-                            description: $.unescapifyHTML(item.description),
-                            link: (item.link.contains('http:')) ? item.link.replace(/http:/g, 'https:') : item.link,
-                            image: null //images[ item.category ] || images[ 'default' ] // get image
-                        };
-                        // TODO: add date in again by uncommenting line below
-                        //$.extend(object[index], date);
+
+                // remove duplicates
+                clean.standard = $.map( clean.standard, function( item, i ) {
+                    var desc = item.description;
+                    // get items with matching urls in priority feed
+                    var duplicate = $.map( clean.priority, function( item ) {
+                        return item.description === desc ? item : null;
+                    });
+                    if ( duplicate.length > 0 ) {
+                        // it's in the priority feed, remove it from clean.standard
+                        return null;
                     }
+
+                    return item;
                 });
-                var array = $.map(object, function(value) {
-                    return [value];
+
+                var newsItems = clean.priority.concat( clean.standard );
+                $.each( newsItems, function( i, item ) {
+                    item.description = $.unescapifyHTML( item.description );
+                    item.link = item.link.replace( /^http:/, 'https' );
+                    item.image = null;
                 });
-                return (array.length > TOTAL) ? array.slice(0, TOTAL) : array;
+
+                return newsItems.slice(0, TOTAL);
             }
         },
         show: {
