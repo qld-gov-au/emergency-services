@@ -11,7 +11,7 @@
             "src/assets/script/xml2json.js",
             "src/assets/script/mocks.js",
             "src/assets/script/date.js",
-            "src/assets/script/app.beta.js"
+            "src/assets/script/app.js"
         ]
     }
 }
