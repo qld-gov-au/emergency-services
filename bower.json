@@ -22,7 +22,6 @@
     "json3": "~3.3.2",
     "datejs": "~1.0.0-rc3",
     "es5-shim": "~4.0.6",
-    "routie": "~0.3.2",
     "handlebars": "~2.0.0"
   },
   "description": "Single-page application for emergency services feed"
