@@ -1,4 +1,4 @@
-/* globals jQuery, qg, xml2json, React, Date, Mocks */
+/* globals jQuery, qg, xml2json, React, Date, Mocks, Handlebars */
 /* jshint expr:true, unused:false, newcap:false, sub: true */
 
 if (!String.prototype.contains) {
@@ -8,53 +8,84 @@ if (!String.prototype.contains) {
     };
 }
 
-(function ($, swe, React, Date, Mocks) {
+if (!Object.keys) {
+    Object.keys = function(o) {
+        if (o !== Object(o)) {
+            throw new TypeError('Object.keys called on a non-object');
+        }
+        var k=[],p;
+        for (p in o) {
+            if (Object.prototype.hasOwnProperty.call(o,p)) {
+                k.push(p);
+            }
+        }
+        return k;
+    };
+}
+
+qg.swe.emergency = (function ($, swe, Date, Mocks) {
     'use strict';
 
-    var PRIORITY_URL = 'https://newsroom.psba.qld.gov.au/services/PostFeed.svc/GetPosts/GetPosts/1095';
-    var PRIORITY_LIMIT = 3;
-    var ANNOUNCEMENTS_URL = 'https://newsroom.psba.qld.gov.au/services/PostFeed.svc/GetPosts/GetPosts/0';
-    var ANNOUNCEMENTS_LIMIT = 8;
-    var TIME_DELAY = 300;
-    var USE_MOCKS = false;
-    var TOTAL = 8;
+    // jquery objects
+    var $parent = $('.announcements');
+    var $slides = $parent.find('.emergency-feed');
 
-    // react component
-    var NewsFeed = React.createClass({
-        getInitialState: function () {
-            return {
+    var template = {
+        loading: $('#loading-template').html(),
+        error: $('#error-template').html(),
+        list: $('#list-template').html()
+    };
+
+    // parameters
+    var TOTAL = 8;
+    var TIME_DELAY = 300;
+    var JSON_KEY = 'GetPostsResult';
+    var PRIORITY_URL = 'https://newsroom.psba.qld.gov.au/services/PostFeed.svc/GetPosts/GetPosts/1095';
+    var ANNOUNCEMENTS_URL = 'https://newsroom.psba.qld.gov.au/services/PostFeed.svc/GetPosts/GetPosts/0';
+
+    var app = {
+        init: function () {
+            // properties
+            this.props = {
+                mocks: false,
                 loading: true,
                 error: false,
                 emergency: false,
                 json: {
                     priority: null,
-                    announcements: null
+                    standard: null
                 },
                 data: {
                     items: null,
                     images: null
                 }
             };
-        },
 
-        getPriorityFeed: function () {
-            //console.log('XDomainRequest: ', 'XDomainRequest' in window);
-            // reset state
-            this.setState(this.getInitialState());
-            var component = this;
-            // request feed
-            $.ajax({
-                type: 'GET',
-                url: this.props.url.priority,
-                contentType: 'application/json; charset=utf-8',
-                crossDomain: true,
-                dataType: 'jsonp',
-                jsonp: 'callback',
-                async: false,
-                timeout: 10000 // timeout after 10 seconds
-            }).done(function ( jqXHR ) {
-                component.setComponentState( jqXHR );
-            }).fail(function ( jqXHR, textStatus ) {
+            // set template
+            this.show.loading();
+            // get data
+            this.data.priority();
+        },
+        get: {
+            json: function (endPoint) {
+                // request feed
+                $.ajax({
+                    type: 'GET',
+                    url: endPoint,
+                    contentType: 'application/json; charset=utf-8',
+                    crossDomain: true,
+                    dataType: 'jsonp',
+                    jsonp: 'callback',
+                    // async: false,
+                    timeout: 10000 // timeout after 10 seconds
+                }).done(function ( jqXHR ) {
+                    app.set.state(jqXHR);
+                }).fail(function ( jqXHR, textStatus ) {
+                    app.get.errors(jqXHR, textStatus);
+                });
+            },
+            errors: function (jqXHR, textStatus) {
+                // log errors
                 if (jqXHR.status === 0) {
                     console.log('No connection. Verify Network.');
                 } else if (jqXHR.status === 404) {
@@ -67,201 +98,76 @@ if (!String.prototype.contains) {
                     console.log('Time out error.');
                 } else if (textStatus === 'abort') {
                     console.log('Ajax request aborted.');
+                } else if (textStatus === 'not-rss') {
+                    console.log('Invalid RSS');
                 } else {
-                    console.log('Uncaught Error.n' + jqXHR.responseText);
+                    console.log('Uncaught error: ' + jqXHR.responseText);
                 }
-                component.setState({
-                    error: true,
-                    loading: false
-                });
-            });
-        },
+                // set props
+                app.props.error = true;
+                app.props.loading = false;
+            },
+            images: function () {
 
-        getAnnouncementsFeed: function () {
-            var component = this;
-            // request feed
-            $.ajax({
-                type: 'GET',
-                url: this.props.url.announcements,
-                contentType: 'application/json; charset=utf-8',
-                crossDomain: true,
-                dataType: 'jsonp',
-                jsonp: 'callback',
-                async: false,
-                timeout: 10000 // timeout after 10 seconds
-            }).done(function ( jqXHR ) {
-                component.setComponentState( jqXHR );
-            }).fail(function ( jqXHR, textStatus ) {
-                if (jqXHR.status === 0) {
-                    console.log('No connection. Verify Network.');
-                } else if (jqXHR.status === 404) {
-                    console.log('Requested page not found. [404]');
-                } else if (jqXHR.status === 500) {
-                    console.log('Internal Server Error [500].');
-                } else if (textStatus === 'parsererror') {
-                    console.log('Requested JSON parse failed.');
-                } else if (textStatus === 'timeout') {
-                    console.log('Time out error.');
-                } else if (textStatus === 'abort') {
-                    console.log('Ajax request aborted.');
+            }
+        },
+        set: {
+            state: function(response) {
+                // set data key
+                var key = (!app.props.json.priority) ? 'priority' : 'standard';
+                // if using mocks then grab dummy data
+                var data = app.props.mock ? Mocks.getNews[key](true) : (response.hasOwnProperty(JSON_KEY)) && response[JSON_KEY];
+                // if no priority items set
+                if (!app.props.json.priority) {
+                    // set emergency trigger
+                    var trigger = !!data.length;
+                    // set props
+                    app.props.error = false;
+                    app.props.loading = true;
+                    app.props.emergency = trigger;
+                    app.props.json.priority = data;
+                    // get standard feed
+                    app.data.standard();
+                    // set position of feed
+                    app.set.position();
                 } else {
-                    console.log('Uncaught Error.n' + jqXHR.responseText);
+                    // set props
+                    app.props.loading = false;
+                    app.props.json.standard = data;
+                    // handle our data set
+                    app.data.handle();
                 }
-                component.setState({
-                    error: true,
-                    loading: false
-                });
-            });
-        },
-
-        setComponentState: function (response) {
-            var key = (!this.state.json.priority) ? 'priority' : 'announcements';
-            var data = {};
-            if (this.props.mock) {
-                data = Mocks.getNews[ key ](true);
-            } else {
-                data = response;
-            }
-
-            if (!this.state.json.priority) {
-                // change mocks format
-                var trigger = (data.hasOwnProperty('GetPostsResult')) ? !!data['GetPostsResult'].length : !!data.length;
-                this.setState({
-                    error: false,
-                    loading: true,
-                    emergency: trigger,
-                    json: {
-                        priority: data, // append these news items
-                        announcements: null
-                    }
-                });
-                this.getAnnouncementsFeed();
-
-            }
-            else {
-                this.setState({
-                    loading: false,
-                    json: {
-                        priority: this.state.json.priority,
-                        announcements: data // append these news items
-                    }
-                });
-                this.handleFeedData();
-            }
-        },
-
-        handleFeedData: function () {
-            if (!!Object.keys(this.state.json).length) {
-                var catImages = Mocks.getCategoryImages();
-                var cleanJson = this.cleanFeedItems();
-                var feedItems = this.parseFeedItems(cleanJson, catImages);
-                // if feed items length is true && data items length is not false (true)
-                if (!!feedItems.length && !this.state.data.items) {
-                    this.setState({
-                        priority: this.props.priority,
-                        // prepend these priority items
-                        data: {
-                            images: catImages,
-                            items: feedItems
-                        }
-                    });
-                }
-            }
-        },
-
-        cleanFeedItems: function () {
-            var stringify = JSON.stringify(this.state.json);
-            var replace = stringify.replace(/(<script.*?>.*?<\/script>)/g, '').replace(/(<iframe.*?>.*?<\/iframe>)/g, '');
-            return JSON.parse(replace);
-        },
-
-        parseFeedItems: function (json, images) {
-            var result = [],
-                channel = {},
-                component = this,
-                count = 0;
-
-            $.each(json, function (key, value) {
-                channel[key] = (value.hasOwnProperty('GetPostsResult')) ? value['GetPostsResult'] : value;
-            });
-
-            // are there any items!?
-            if (!Object.keys(channel).length) {
-                return [];
-            }
-
-            // set an array from each item and escape the content
-            $.each(channel, function (key, list) {
-                // set an array from each item and escape the content
-                if (!!list.length) {
-                    if (list.length >= 1) {
-                        // loop through
-                        $.each(list, function (index, item) {
-                            if (count <= component.props.limit[key]) {
-                                item.description = $.unescapifyHTML(item.description);
-                                item.image = images[ item.category ] || images[ 'default' ]; // get image
-                                item.link = (item.link.contains('http:')) || item.link.replace(/http:/g, 'https:');
-                                item.id = count;
-                                result.push(item);
-                                count++;
-                            }
-                        });
-                    } else {
-                        var item = list[0];
-                        item.description = $.unescapifyHTML(item.description);
-                        // get image
-                        //value.image = component.getImageCategory( value.category );
-                        item.image = images[ item.category ] || images[ 'default' ];
-                        item.link = (item.link.contains('http:')) && item.link.replace(/http:/g, 'https:');
-                        item.id = count;
-                        result.push(item);
-                        count++;
-                    }
-                }
-                count++;
-            });
-
-            // splice the array depending on the parameters
-//            if (result.length > this.props.total) {
-//                result.splice(0, result.length - this.props.total);
-//            }
-
-            return result;
-        },
-
-        componentDidMount: function () {
-            this.getPriorityFeed();
-            // setInterval(this.getFeed, this.props.pollInterval);
-        },
-
-        componentDidUpdate: function () {
-            if (this.state.data.items) {
-                var $slides = $('.slide-runner');
-                var $parent = $slides.parents('.announcements');
-                var component = this;
+            },
+            position: function () {
                 // position slides
-                if (this.state.emergency) {
+                if (app.props.emergency) {
                     $('body').addClass('emergency-state');
                     $('h1', '#content').first().after($parent);
                 } else {
                     $('body').removeClass('emergency-state');
                     $('#asides').after($parent);
                 }
-
+            },
+            date: function (pubDate) {
+                var date = Date.parse(pubDate);
+                return {
+                    timestamp: date.getTime(),
+                    formattedDate: date.toString('d MMMM yyyy, h.mm') + ((date.toString('HH') >= 12) ? 'pm' : 'am')
+                };
+            },
+            plugin: function () {
                 // set up slides and controls
-                $slides.each(function (key) {
+                $slides.addClass('slide-runner').each(function (key) {
                     var $this = $(this);
-                    window.setTimeout(function () {
-                        $this.slideRunner({
-                            key: key,
-                            grouping: 3,                         // the grouping for responsive view (default is 3)
-                            timeout: 6,                          // the timeout for autoplay (in seconds)
-                            easing: 'linear',                    // the easing setting (jQuery easing plugin)
-                            controlsPosition: 'above',           // the position of the controls (above or below)
-                            autoplay: !component.state.emergency,// the trigger for autoplay
-                            fluid: true                          // the trigger for fluid width
-                        });
-                    }, TIME_DELAY);
+                    $this.slideRunner({
+                        key: key,
+                        grouping: 3,                         // the grouping for responsive view (default is 3)
+                        timeout: 6,                          // the timeout for autoplay (in seconds)
+                        easing: 'linear',                    // the easing setting (jQuery easing plugin)
+                        controlsPosition: 'above',           // the position of the controls (above or below)
+                        autoplay: !app.props.emergency,      // the trigger for autoplay
+                        fluid: true                          // the trigger for fluid width
+                    });
                 });
                 var onResizeSlides = function () {
                     $slides.each(function () {
@@ -271,71 +177,81 @@ if (!String.prototype.contains) {
                 $(window).smartresize(onResizeSlides);
             }
         },
+        data: {
+            priority: function () {
+                app.get.json(PRIORITY_URL);
+            },
+            standard: function () {
+                app.get.json(ANNOUNCEMENTS_URL);
+            },
+            handle: function () {
+                // check if object has keys
+                if (!!app.props.json.priority || !!app.props.json.standard) {
+                    var images = Mocks.getCategoryImages();
+                    var clean = app.data.clean();
+                    var items = app.data.parse(clean, images);
+                    // if feed items length is true && data items length is not false (true)
+                    if (!!Object.keys(items).length && !app.props.data.items) {
+                        app.props.data.images = images;
+                        app.props.data.items = items;
+                        app.show.list();
+                    } else {
+                        app.show.error();
+                    }
+                }
+            },
+            clean: function () {
+                var stringify = JSON.stringify(app.props.json);
+                var replace = stringify.replace(/(<script.*?>.*?<\/script>)/g, '').replace(/(<iframe.*?>.*?<\/iframe>)/g, '');
+                return JSON.parse(replace);
+            },
+            parse: function(clean, images) {
 
-        render: function () {
-            return (
-                (!!this.state.loading) ?
-                    React.DOM.div({ className: 'status info' },
-                        React.DOM.h2({}, 'Loading…'),
-                        React.DOM.p({}, 'Please wait while we fetch the news.')
-                    )
-                    : (!!this.state.error) ?
-                    React.DOM.div({ className: 'status info' },
-                        React.DOM.h2({}, 'Error'),
-                        React.DOM.p({}, 'There was an error loading the news feed.')
-                    )
-                    : (!!this.state.data.items) ?
-                    React.DOM.div({ className: 'list' }, // use 'list'
-                        this.state.data.items.map(function (item) {
-                            return (
-                                React.DOM.div({ className: 'section', key: 'slide' + item.id },
-                                    // images no longer required
-                                    /*React.DOM.a({ href: item.link, target: '_blank' },
-                                        React.DOM.span({ className: 'feature' },
-                                            React.DOM.img({ height: 189, width: 373, alt: item.image.alt, src: item.image.src })
-                                        )
-                                    ),*/
-                                    React.DOM.h3({},
-                                      React.DOM.a({ href: item.link, target: '_blank' }, item.title )
-                                    ),
-                                    React.DOM.div({ className: 'feature-content' },
-                                        //React.DOM.p({}, item.description),
-                                        React.DOM.p({dangerouslySetInnerHTML: {__html: item.description}}),
-                                        React.DOM.p({ className: 'more' },
-                                            React.DOM.a({ href: item.link, title: 'Read more about: ' + item.title, target: '_blank' }, 'More...')
-                                        )
-                                    )
-                                )
-                                );
-                        })
-                    )
-                    // no data
-                    : React.DOM.div({ className: 'status info' },
-                    React.DOM.h2({}, 'No news'),
-                    React.DOM.p({}, 'Please check back later.')
-                )
-                );
+                // remove duplicates
+                clean.standard = $.map( clean.standard, function( item, i ) {
+                    var desc = item.description;
+                    // get items with matching urls in priority feed
+                    var duplicate = $.map( clean.priority, function( item ) {
+                        return item.description === desc ? item : null;
+                    });
+                    if ( duplicate.length > 0 ) {
+                        // it's in the priority feed, remove it from clean.standard
+                        return null;
+                    }
 
+                    return item;
+                });
+
+                var newsItems = clean.priority.concat( clean.standard );
+                $.each( newsItems, function( i, item ) {
+                    item.description = $.unescapifyHTML( item.description );
+                    item.link = item.link.replace( /^http:/, 'https' );
+                    item.image = null;
+                });
+
+                return newsItems.slice(0, TOTAL);
+            }
+        },
+        show: {
+            list: function () {
+                if (!app.props.error && !!app.props.data.items) {
+                    var wrapper = {items: app.props.data.items};
+                    var populate = Handlebars.compile(template.list);
+                    $slides.empty().append(populate(wrapper)).trigger('x-height-change');
+                    app.set.plugin();
+                }
+            },
+            error: function (message) {
+                var wrapper = {error: message};
+                var populate = Handlebars.compile(template.error);
+                $slides.empty().append(populate(wrapper)).trigger('x-height-change');
+            },
+            loading: function () {
+                $slides.empty().append(template.loading).trigger('x-height-change');
+            }
         }
-    });
+    };
 
-    // onReady
-    $(function () {
-        // set jquery objects
-        var $slider = $('.slide-runner');
-        // render components
-        React.renderComponent(NewsFeed({
-            url: {
-                priority: PRIORITY_URL,
-                announcements: ANNOUNCEMENTS_URL
-            },
-            limit: {
-                priority: PRIORITY_LIMIT,
-                announcements: ANNOUNCEMENTS_LIMIT
-            },
-            total: TOTAL,
-            mock: USE_MOCKS
-        }), $slider.get(0));
-    });
+    return app;
 
-}(jQuery, qg.swe, React, Date, Mocks));
+}(jQuery, qg.swe, Date, Mocks));
